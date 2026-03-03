@@ -52,8 +52,22 @@ button{
     margin-top:5px;
 }
 .leaderboard-item{
+    display:flex;
+    align-items:center;
+    margin:8px 0;
     text-align:left;
-    margin:5px 0;
+}
+.leaderboard-item img{
+    width:35px;
+    height:35px;
+    border-radius:50%;
+    margin-right:8px;
+    object-fit:cover;
+}
+.footer{
+    margin-top:30px;
+    padding:15px;
+    background:rgba(0,0,0,0.3);
 }
 </style>
 </head>
@@ -84,14 +98,20 @@ button{
 <option value="11">Lớp 11-12 (Căn)</option>
 </select>
 <button onclick="startQuiz()">Làm bài</button>
-<h3>Điểm: <span id="score">0</span></h3>
+<h3>Điểm: <span id="score">0</span></h3><hr>
+<h3>⏰ Báo thức học bài</h3>
+<input type="time" id="alarmTime"><br>
+<button onclick="setAlarm()">Đặt báo thức</button>
+<button onclick="clearAlarm()">Huỷ</button>
+<div id="alarmStatus"></div><hr>
 <div id="quizArea" style="display:none;">
 <h2 id="question"></h2>
 <div id="answers"></div>
-</div>
-<hr>
-<h3>Bảng xếp hạng</h3>
+</div><hr>
+<h3>🏆 Bảng xếp hạng</h3>
 <div id="leaderboard"></div>
+</div><div class="footer">
+Chi tiết liên hệ admin: 0585256245
 </div><script>
 
 if(!localStorage.getItem("Hthtadmin")){
@@ -103,6 +123,7 @@ let currentUser="";
 let score=0;
 let answer=null;
 let level=1;
+let alarmInterval=null;
 
 function login(){
     let u=loginUser.value;
@@ -147,17 +168,35 @@ function uploadAvatar(event){
     reader.onload=function(){
         localStorage.setItem(currentUser+"_avatar",reader.result);
         avatarImg.src=reader.result;
+        updateLeaderboard();
     }
-    reader.readAsDataURL(file);
+    if(file) reader.readAsDataURL(file);
 }
 
 function loadAvatar(){
     let img=localStorage.getItem(currentUser+"_avatar");
-    if(img){
-        avatarImg.src=img;
-    }else{
-        avatarImg.src="";
-    }
+    avatarImg.src=img||"";
+}
+
+function setAlarm(){
+    let time=document.getElementById("alarmTime").value;
+    if(!time){ alert("Chọn giờ trước!"); return; }
+
+    alarmStatus.innerText="Đã đặt báo thức lúc "+time;
+
+    alarmInterval=setInterval(()=>{
+        let now=new Date();
+        let current=now.getHours().toString().padStart(2,'0')+":"+
+                    now.getMinutes().toString().padStart(2,'0');
+        if(current===time){
+            alert("⏰ Tới giờ học bài rồi!");
+        }
+    },1000);
+}
+
+function clearAlarm(){
+    clearInterval(alarmInterval);
+    alarmStatus.innerText="Đã huỷ báo thức";
 }
 
 function startQuiz(){
@@ -209,9 +248,7 @@ function createAnswers(correct){
 
     while(options.length<4){
         let fake=correct+rand(-10,10);
-        if(!options.includes(fake)){
-            options.push(fake);
-        }
+        if(!options.includes(fake)) options.push(fake);
     }
 
     options.sort(()=>Math.random()-0.5);
@@ -230,13 +267,10 @@ function checkAnswer(choice){
     buttons.forEach(b=>b.disabled=true);
 
     if(choice===answer){
-        alert("Đúng!");
         score+=level;
         localStorage.setItem(currentUser+"_score",score);
         document.getElementById("score").innerText=score;
         updateLeaderboard();
-    }else{
-        alert("Sai!");
     }
 
     setTimeout(()=>{generateQuestion();},1000);
@@ -250,7 +284,11 @@ function updateLeaderboard(){
         let key=localStorage.key(i);
         if(key.endsWith("_score")){
             let user=key.replace("_score","");
-            users.push({name:user,score:parseInt(localStorage.getItem(key))});
+            users.push({
+                name:user,
+                score:parseInt(localStorage.getItem(key)),
+                avatar:localStorage.getItem(user+"_avatar")
+            });
         }
     }
 
@@ -259,7 +297,15 @@ function updateLeaderboard(){
     users.forEach((u,index)=>{
         let div=document.createElement("div");
         div.className="leaderboard-item";
-        div.innerText=(index+1)+". "+u.name+" - "+u.score+" điểm";
+
+        let img=document.createElement("img");
+        img.src=u.avatar||"";
+
+        let text=document.createElement("span");
+        text.innerText=(index+1)+". "+u.name+" - "+u.score+" điểm";
+
+        div.appendChild(img);
+        div.appendChild(text);
         leaderboard.appendChild(div);
     });
 }
