@@ -41,7 +41,7 @@ input,select{
     padding:8px;
 }
 button{
-    padding:8px 15px;
+    padding:8px 12px;
     margin:5px;
     border:none;
     border-radius:8px;
@@ -63,6 +63,16 @@ button{
     border-radius:50%;
     margin-right:8px;
     object-fit:cover;
+}
+.alarm-item{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    background:#f1f1f1;
+    padding:6px;
+    border-radius:8px;
+    margin-top:6px;
+    font-size:14px;
 }
 .footer{
     margin-top:30px;
@@ -100,10 +110,10 @@ button{
 <button onclick="startQuiz()">Làm bài</button>
 <h3>Điểm: <span id="score">0</span></h3><hr>
 <h3>⏰ Báo thức học bài</h3>
+<input id="alarmName" placeholder="Tên báo thức"><br>
 <input type="time" id="alarmTime"><br>
-<button onclick="setAlarm()">Đặt báo thức</button>
-<button onclick="clearAlarm()">Huỷ</button>
-<div id="alarmStatus"></div><hr>
+<button onclick="addAlarm()">Thêm báo thức</button>
+<div id="alarmList"></div><hr>
 <div id="quizArea" style="display:none;">
 <h2 id="question"></h2>
 <div id="answers"></div>
@@ -111,8 +121,12 @@ button{
 <h3>🏆 Bảng xếp hạng</h3>
 <div id="leaderboard"></div>
 </div><div class="footer">
-Chi tiết liên hệ admin: 0585256245
+Chi tiết liên hệ admin: 0585256245<br>
+<div id="versionText"></div>
 </div><script>
+
+let VERSION=2;
+document.getElementById("versionText").innerText="Bản cập nhật V"+VERSION;
 
 if(!localStorage.getItem("Hthtadmin")){
     localStorage.setItem("Hthtadmin","đkjsksjbdnd");
@@ -123,7 +137,7 @@ let currentUser="";
 let score=0;
 let answer=null;
 let level=1;
-let alarmInterval=null;
+let alarms=[];
 
 function login(){
     let u=loginUser.value;
@@ -140,6 +154,7 @@ function login(){
         welcomeUser.innerText="Xin chào, "+u;
         loadAvatar();
         updateLeaderboard();
+        loadAlarms();
     }else{
         alert("Sai tài khoản hoặc mật khẩu!");
     }
@@ -149,14 +164,9 @@ function register(){
     let u=regUser.value;
     let p=regPass.value;
 
-    if(u===""||p===""){
-        alert("Nhập đủ thông tin!");
-        return;
-    }
-    if(localStorage.getItem(u)){
-        alert("Tài khoản đã tồn tại!");
-        return;
-    }
+    if(u===""||p==="") return alert("Nhập đủ thông tin!");
+    if(localStorage.getItem(u)) return alert("Tài khoản đã tồn tại!");
+
     localStorage.setItem(u,p);
     localStorage.setItem(u+"_score",0);
     alert("Tạo thành công!");
@@ -174,29 +184,76 @@ function uploadAvatar(event){
 }
 
 function loadAvatar(){
-    let img=localStorage.getItem(currentUser+"_avatar");
-    avatarImg.src=img||"";
+    avatarImg.src=localStorage.getItem(currentUser+"_avatar")||"";
 }
 
-function setAlarm(){
+function addAlarm(){
+    let name=document.getElementById("alarmName").value;
     let time=document.getElementById("alarmTime").value;
-    if(!time){ alert("Chọn giờ trước!"); return; }
+    if(!name||!time) return alert("Nhập đủ tên và giờ!");
 
-    alarmStatus.innerText="Đã đặt báo thức lúc "+time;
+    alarms.push({name,time});
+    saveAlarms();
+    renderAlarms();
+}
 
-    alarmInterval=setInterval(()=>{
+function renderAlarms(){
+    alarmList.innerHTML="";
+    alarms.forEach((a,index)=>{
+        let div=document.createElement("div");
+        div.className="alarm-item";
+
+        let text=document.createElement("span");
+        text.innerText=a.name+" - "+a.time;
+        text.onclick=function(){editAlarm(index)};
+
+        let del=document.createElement("button");
+        del.innerText="X";
+        del.onclick=function(){deleteAlarm(index)};
+
+        div.appendChild(text);
+        div.appendChild(del);
+        alarmList.appendChild(div);
+    });
+}
+
+function deleteAlarm(index){
+    alarms.splice(index,1);
+    saveAlarms();
+    renderAlarms();
+}
+
+function editAlarm(index){
+    let newName=prompt("Sửa tên:",alarms[index].name);
+    let newTime=prompt("Sửa giờ (HH:MM):",alarms[index].time);
+    if(newName&&newTime){
+        alarms[index]={name:newName,time:newTime};
+        saveAlarms();
+        renderAlarms();
+    }
+}
+
+function saveAlarms(){
+    localStorage.setItem(currentUser+"_alarms",JSON.stringify(alarms));
+}
+
+function loadAlarms(){
+    alarms=JSON.parse(localStorage.getItem(currentUser+"_alarms"))||[];
+    renderAlarms();
+    checkAlarmLoop();
+}
+
+function checkAlarmLoop(){
+    setInterval(()=>{
         let now=new Date();
         let current=now.getHours().toString().padStart(2,'0')+":"+
                     now.getMinutes().toString().padStart(2,'0');
-        if(current===time){
-            alert("⏰ Tới giờ học bài rồi!");
-        }
-    },1000);
-}
-
-function clearAlarm(){
-    clearInterval(alarmInterval);
-    alarmStatus.innerText="Đã huỷ báo thức";
+        alarms.forEach(a=>{
+            if(a.time===current){
+                alert("⏰ "+a.name+" - Tới giờ rồi!");
+            }
+        });
+    },60000);
 }
 
 function startQuiz(){
@@ -263,17 +320,13 @@ function createAnswers(correct){
 }
 
 function checkAnswer(choice){
-    let buttons=document.querySelectorAll(".answerBtn");
-    buttons.forEach(b=>b.disabled=true);
-
     if(choice===answer){
         score+=level;
         localStorage.setItem(currentUser+"_score",score);
         document.getElementById("score").innerText=score;
         updateLeaderboard();
     }
-
-    setTimeout(()=>{generateQuestion();},1000);
+    setTimeout(()=>{generateQuestion();},800);
 }
 
 function updateLeaderboard(){
