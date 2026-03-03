@@ -2,7 +2,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>HTHT Ultimate</title>
+<title>HTHT Dragon Ultimate</title>
 <style>
 body{margin:0;font-family:Arial;background:#0b0f1a;color:white}
 .nav{display:flex;gap:20px;padding:15px;background:#111827;position:sticky;top:0}
@@ -12,26 +12,26 @@ body{margin:0;font-family:Arial;background:#0b0f1a;color:white}
 input,select,button{padding:8px;border-radius:8px;border:none;margin:5px 0}
 button.action{background:#2563eb;color:white;cursor:pointer}
 .profile-box{display:flex;align-items:center;gap:15px}
-.profile-box img{width:70px;height:70px;border-radius:50%;object-fit:cover;background:white}
-.answer-btn{display:block;width:100%;margin:5px 0;background:#374151;color:white;cursor:pointer}
-.rank-item{display:flex;align-items:center;gap:10px;background:#374151;padding:8px;border-radius:8px;margin:5px 0}
-.rank-item img{width:40px;height:40px;border-radius:50%;object-fit:cover}
-.footer{text-align:center;margin-top:40px;opacity:0.6}
+.avatar{width:80px;height:80px;border-radius:50%;object-fit:cover;background:white}
+.answer-btn{display:block;width:100%;margin:6px 0;background:#374151;color:white;cursor:pointer}
+.rank-item{display:flex;align-items:center;gap:12px;background:#374151;padding:10px;border-radius:10px;margin:8px 0}
+.rank-item img{width:60px;height:60px;border-radius:50%;object-fit:cover;background:white}
+.top1{border:4px solid gold;animation:dragonFire 2s linear infinite}
+.top2{border:4px solid silver;animation:glowSilver 2s infinite alternate}
+.top3{border:4px solid #cd7f32;animation:glowBronze 2s infinite alternate}
+@keyframes dragonFire{0%{box-shadow:0 0 10px orange,0 0 20px red}50%{box-shadow:0 0 30px yellow,0 0 60px red}100%{box-shadow:0 0 10px orange,0 0 20px red}}
+@keyframes glowSilver{from{box-shadow:0 0 10px #aaa}to{box-shadow:0 0 25px white}}
+@keyframes glowBronze{from{box-shadow:0 0 10px #cd7f32}to{box-shadow:0 0 25px orange}}
 </style>
 </head>
 <body>
-<div id="app"></div><script>
+<div id="app"></div>
+<script>
 const USERS_KEY="htht_users";
-const CURRENT_KEY="htht_current";
+const CURRENT_KEY="htht_current";function getUsers(){return JSON.parse(localStorage.getItem(USERS_KEY))||[]} function saveUsers(u){localStorage.setItem(USERS_KEY,JSON.stringify(u))} function getCurrent(){return localStorage.getItem(CURRENT_KEY)} function setCurrent(u){localStorage.setItem(CURRENT_KEY,u)} function logout(){localStorage.removeItem(CURRENT_KEY);location.reload()}
 
-function getUsers(){return JSON.parse(localStorage.getItem(USERS_KEY))||[]}
-function saveUsers(u){localStorage.setItem(USERS_KEY,JSON.stringify(u))}
-function getCurrent(){return localStorage.getItem(CURRENT_KEY)}
-function setCurrent(u){localStorage.setItem(CURRENT_KEY,u)}
-function logout(){localStorage.removeItem(CURRENT_KEY);location.reload()}
+function renderLogin(){ document.getElementById("app").innerHTML=`
 
-function renderLogin(){
-document.getElementById("app").innerHTML=`
 <div class='container'>
 <h2>HTHT Đăng nhập</h2>
 <input id='lUser' placeholder='Tài khoản'><br>
@@ -43,134 +43,57 @@ document.getElementById("app").innerHTML=`
 <input id='rPass' type='password' placeholder='Mật khẩu'><br>
 <select id='rGrade'>${[...Array(12)].map((_,i)=>`<option>${i+1}</option>`).join('')}</select><br>
 <button class='action' onclick='register()'>Tạo tài khoản</button>
-</div>`}
+</div>`}function register(){ let users=getUsers(); let u=rUser.value.trim(); let p=rPass.value.trim(); let g=parseInt(rGrade.value); if(!u||!p)return alert("Nhập đủ!"); if(users.find(x=>x.username===u))return alert("Tồn tại!"); users.push({username:u,password:p,grade:g,score:0,avatar:"",daily:0,last:""}); saveUsers(users);alert("OK");renderLogin()}
 
-function register(){
-let users=getUsers();
-let u=rUser.value.trim();
-let p=rPass.value.trim();
-let g=parseInt(rGrade.value);
-if(!u||!p)return alert("Nhập đủ!");
-if(users.find(x=>x.username===u))return alert("Tồn tại!");
-users.push({username:u,password:p,grade:g,score:0,avatar:"",daily:0,last:"",alarms:[]});
-saveUsers(users);alert("OK");renderLogin()}
+function login(){ let u=lUser.value.trim(); let p=lPass.value.trim(); let user=getUsers().find(x=>x.username===u&&x.password===p); if(!user)return alert("Sai!"); setCurrent(u);renderHome()}
 
-function login(){
-let u=lUser.value.trim();
-let p=lPass.value.trim();
-let user=getUsers().find(x=>x.username===u&&x.password===p);
-if(!user)return alert("Sai!");
-setCurrent(u);renderHome()}
+function dailyCheck(user){ let today=new Date().toLocaleDateString(); if(user.last!==today){user.last=today;user.daily=0} if(user.daily>=10)return false; user.daily++;return true}
 
-function dailyCheck(user){
-let today=new Date().toLocaleDateString();
-if(user.last!==today){user.last=today;user.daily=0}
-if(user.daily>=10)return false;
-user.daily++;return true}
+function generateQuestion(g){ let q,correct,answers=[]; if(g<=3){let a=Math.floor(Math.random()*10);let b=Math.floor(Math.random()*10);correct=a+b;q=${a}+${b}=?} else if(g<=6){let a=Math.floor(Math.random()10)+1;correct=aa;q=${a}²=?} else if(g<=9){let a=Math.floor(Math.random()*10)+1;correct=a;q=√${a*a}=?} else{let x=Math.floor(Math.random()*5)+1;correct=x;q=2x+3=${2*x+3}. x=?} answers.push(correct); while(answers.length<4){let fake=correct+Math.floor(Math.random()*5)-2;if(!answers.includes(fake))answers.push(fake)} answers.sort(()=>Math.random()-0.5); return{q,correct,answers}}
 
-function generateQuestion(g){
-let q,correct,answers=[];
-if(g<=3){let a=Math.floor(Math.random()*10);let b=Math.floor(Math.random()*10);correct=a+b;q=`${a}+${b}=?`}
-else if(g<=6){let a=Math.floor(Math.random()*10)+1;correct=a*a;q=`${a}²=?`}
-else if(g<=9){let a=Math.floor(Math.random()*10)+1;correct=a;q=`√${a*a}=?`}
-else{let x=Math.floor(Math.random()*5)+1;correct=x;q=`2x+3=${2*x+3}. x=?`}
-answers.push(correct);
-while(answers.length<4){let fake=correct+Math.floor(Math.random()*5)-2;if(!answers.includes(fake))answers.push(fake)}
-answers.sort(()=>Math.random()-0.5);
-return{q,correct,answers}}
+function renderHome(){ let user=getUsers().find(x=>x.username===getCurrent()); document.getElementById("app").innerHTML=`
 
-function renderHome(){
-let user=getUsers().find(x=>x.username===getCurrent());
-document.getElementById("app").innerHTML=`
 <div class='nav'>
-<button onclick='showSection("alarm")'>Báo thức</button>
-<button onclick='showSection("quiz")'>Bài tập</button>
-<button onclick='showSection("rank")'>Bảng xếp hạng</button>
+<button onclick='renderQuiz()'>Bài tập</button>
+<button onclick='renderRanking()'>Bảng xếp hạng</button>
 <button onclick='logout()'>Đăng xuất</button>
 </div>
 <div class='container'>
-<div class='profile-box'>
-<img src='${user.avatar||""}' id='avatarImg'>
+<div class='card profile-box'>
+<img src='${user.avatar||""}' class='avatar'>
 <div>
 <b>${user.username}</b><br>
-Lớp ${user.grade} | Điểm: ${user.score}<br>
-<input type='file' onchange='uploadAvatar(event)'>
+Lớp: ${user.grade} | Điểm: ${user.score}<br>
+<input type='file' accept='image/*' onchange='uploadAvatar(event)'>
 </div>
 </div>
-<div id='content'></div>
-<div class='footer'>Admin: 0585256245</div>
-</div>`;
-showSection("quiz")}
+</div>`}function uploadAvatar(e){ let reader=new FileReader(); reader.onload=function(){ let users=getUsers(); let user=users.find(x=>x.username===getCurrent()); user.avatar=reader.result; saveUsers(users); renderHome();} reader.readAsDataURL(e.target.files[0]);}
 
-function uploadAvatar(e){
-let file=e.target.files[0];
-let reader=new FileReader();
-reader.onload=function(){
-let users=getUsers();
-let user=users.find(x=>x.username===getCurrent());
-user.avatar=reader.result;
-saveUsers(users);
-renderHome()}
-reader.readAsDataURL(file)}
+function renderQuiz(){ let user=getUsers().find(x=>x.username===getCurrent()); let qa=generateQuestion(user.grade); let html=`<div class='nav'> <button onclick='renderQuiz()'>Bài tập</button> <button onclick='renderRanking()'>Bảng xếp hạng</button> <button onclick='logout()'>Đăng xuất</button>
 
-function showSection(type){
-let user=getUsers().find(x=>x.username===getCurrent());
-if(type=="quiz"){
-let q=generateQuestion(user.grade);
-window.currentAnswer=q.correct;
-document.getElementById("content").innerHTML=`
-<div class='card'>
-<h3>${q.q}</h3>
-${q.answers.map(a=>`<button class='answer-btn' onclick='checkAnswer(${a})'>${a}</button>`).join('')}
-</div>`}
+</div>
+<div class='container'><div class='card'>
+<h3>${qa.q}</h3>`;
+qa.answers.forEach(a=>{
+html+=`<button class='answer-btn' onclick='checkAnswer(${a},${qa.correct})'>${a}</button>`});
+html+="</div></div>";
+document.getElementById("app").innerHTML=html}function checkAnswer(a,c){ let users=getUsers(); let user=users.find(x=>x.username===getCurrent()); if(!dailyCheck(user))return alert("Đủ 10 lần!"); if(a===c){user.score+=user.grade;alert("Đúng +"+user.grade)} else alert("Sai!"); saveUsers(users);renderQuiz()}
 
-if(type=="rank"){
-let users=getUsers().sort((a,b)=>b.score-a.score);
-document.getElementById("content").innerHTML=`
-<div class='card'>
-<h3>Bảng xếp hạng</h3>
-${users.map((u,i)=>`
-<div class='rank-item'>
-<img src='${u.avatar||""}'>
-${i+1}. ${u.username} - ${u.score} điểm
-</div>`).join('')}
-</div>`}
+function renderRanking(){ let users=getUsers().sort((a,b)=>b.score-a.score); let html=`<div class='nav'> <button onclick='renderQuiz()'>Bài tập</button> <button onclick='renderRanking()'>Bảng xếp hạng</button> <button onclick='logout()'>Đăng xuất</button>
 
-if(type=="alarm"){
-document.getElementById("content").innerHTML=`
-<div class='card'>
-<h3>Báo thức</h3>
-<input id='alarmName' placeholder='Tên'>
-<input id='alarmTime' type='time'>
-<button class='action' onclick='addAlarm()'>Thêm</button>
-<div id='alarmList'></div>
-</div>`;
-renderAlarms()}}
+</div>
+<div class='container'><h2>🏆 Bảng Xếp Hạng</h2>`;
+users.forEach((u,i)=>{
+let cls="";
+if(i===0)cls="top1";
+if(i===1)cls="top2";
+if(i===2)cls="top3";
+html+=`<div class='rank-item'>
+<img src='${u.avatar||""}' class='${cls}'>
+<div><b>#${i+1} ${u.username}</b><br>Điểm: ${u.score}</div>
+</div>`});
+html+="</div>";
+document.getElementById("app").innerHTML=html}if(getCurrent())renderHome();else renderLogin(); </script>
 
-function checkAnswer(a){
-let users=getUsers();
-let user=users.find(x=>x.username===getCurrent());
-if(!dailyCheck(user))return alert("Đủ 10 lần hôm nay!");
-if(a==window.currentAnswer){user.score+=user.grade;alert("Đúng +"+user.grade)}else alert("Sai!");
-saveUsers(users);renderHome()}
-
-function addAlarm(){
-let users=getUsers();
-let user=users.find(x=>x.username===getCurrent());
-user.alarms.push({name:alarmName.value,time:alarmTime.value});
-saveUsers(users);renderAlarms()}
-
-function renderAlarms(){
-let user=getUsers().find(x=>x.username===getCurrent());
-document.getElementById("alarmList").innerHTML=user.alarms.map((a,i)=>
-`<div>${a.name} - ${a.time} <button onclick='deleteAlarm(${i})'>X</button></div>`).join('')}
-
-function deleteAlarm(i){
-let users=getUsers();
-let user=users.find(x=>x.username===getCurrent());
-user.alarms.splice(i,1);
-saveUsers(users);renderAlarms()}
-
-if(getCurrent())renderHome();else renderLogin();
-</script></body>
+</body>
 </html>
