@@ -6,186 +6,215 @@
 
 <style>
 body{
-    margin:0;
-    font-family:Arial;
-    background:linear-gradient(135deg,#4e73df,#1cc88a);
-    color:white;
+    font-family: Arial;
     text-align:center;
+    background: linear-gradient(135deg,#4facfe,#00f2fe);
+    color:white;
 }
 .box{
-    background:rgba(0,0,0,0.4);
+    background:white;
+    color:black;
+    width:350px;
+    margin:20px auto;
     padding:20px;
     border-radius:15px;
-    width:90%;
-    max-width:400px;
-    margin:20px auto;
 }
 button{
     padding:8px 15px;
+    margin:5px;
     border:none;
     border-radius:8px;
     cursor:pointer;
-    margin:5px;
 }
-input,select{
-    padding:6px;
-    margin:5px;
-    border-radius:6px;
-    border:none;
+.answerBtn{
+    display:block;
+    width:100%;
 }
-.hidden{display:none;}
 </style>
 </head>
 
 <body>
 
-<h1>HTHT học tập web</h1>
+<h1>HTHT Học Tập Web</h1>
 
-<div id="loginBox" class="box">
-    <h3>Đăng nhập</h3>
-    <input id="username" placeholder="Tên tài khoản"><br>
-    <input id="password" type="password" placeholder="Mật khẩu"><br>
-    <button onclick="login()">Đăng nhập</button>
+<div class="box" id="loginBox">
+<h3>Đăng nhập</h3>
+<input id="loginUser" placeholder="Tên tài khoản"><br><br>
+<input id="loginPass" type="password" placeholder="Mật khẩu"><br><br>
+<button onclick="login()">Đăng nhập</button>
+
+<hr>
+
+<h3>Đăng ký</h3>
+<input id="regUser" placeholder="Tên tài khoản"><br><br>
+<input id="regPass" type="password" placeholder="Mật khẩu"><br><br>
+<button onclick="register()">Tạo tài khoản</button>
 </div>
 
-<div id="mainBox" class="hidden">
+<div class="box" id="mainWeb" style="display:none;">
+<h3>Chọn lớp</h3>
+<select id="classSelect">
+<option value="1">Lớp 1</option>
+<option value="2">Lớp 2</option>
+<option value="3">Lớp 3</option>
+<option value="4">Lớp 4</option>
+<option value="5">Lớp 5</option>
+<option value="6">Lớp 6</option>
+<option value="7">Lớp 7</option>
+<option value="8">Lớp 8</option>
+<option value="9">Lớp 9</option>
+<option value="10">Lớp 10</option>
+<option value="11">Lớp 11</option>
+<option value="12">Lớp 12</option>
+</select>
+<button onclick="startQuiz()">Làm bài</button>
 
-    <div class="box">
-        <h3>Xin chào <span id="userShow"></span></h3>
-        <p>Điểm của bạn: <span id="score">0</span></p>
-        <button onclick="logout()">Đăng xuất</button>
-    </div>
+<h3>Điểm: <span id="score">0</span></h3>
 
-    <div class="box">
-        <h3>Báo thức</h3>
-        <input type="time" id="alarmTime">
-        <button onclick="setAlarm()">Đặt báo thức</button>
-    </div>
-
-    <div class="box">
-        <h3>Làm bài tập lấy điểm</h3>
-        <select id="classSelect">
-            <option value="1">Lớp 1</option>
-            <option value="2">Lớp 2</option>
-            <option value="3">Lớp 3</option>
-            <option value="4">Lớp 4</option>
-            <option value="5">Lớp 5</option>
-            <option value="6">Lớp 6</option>
-            <option value="7">Lớp 7</option>
-            <option value="8">Lớp 8</option>
-            <option value="9">Lớp 9</option>
-            <option value="10">Lớp 10</option>
-            <option value="11">Lớp 11</option>
-            <option value="12">Lớp 12</option>
-        </select>
-        <button onclick="startQuiz()">Làm bài</button>
-        <div id="quizBox"></div>
-    </div>
+<div id="quizArea" style="display:none;">
+<h2 id="question"></h2>
+<div id="answers"></div>
+</div>
 
 </div>
 
 <script>
 
-// 🔐 Tạo admin mặc định (không ghi đè nếu đã có)
+// ADMIN AUTO CREATE
 if(!localStorage.getItem("Hthtadmin")){
     localStorage.setItem("Hthtadmin","đkjsksjbdnd");
 }
 
-let currentUser = null;
+let currentUser = "";
+let score = 0;
+let answer = null;
+let classLevel = 1;
 
 // LOGIN
 function login(){
-    let user = username.value;
-    let pass = password.value;
+    let u = loginUser.value;
+    let p = loginPass.value;
+    let saved = localStorage.getItem(u);
 
-    if(localStorage.getItem(user) === pass){
-        currentUser = user;
-        loginBox.classList.add("hidden");
-        mainBox.classList.remove("hidden");
-        userShow.innerText = user;
-        loadScore();
-    } else {
+    if(saved === p){
+        currentUser = u;
+        loginBox.style.display="none";
+        mainWeb.style.display="block";
+        score = parseInt(localStorage.getItem(u+"_score")) || 0;
+        document.getElementById("score").innerText = score;
+    }else{
         alert("Sai tài khoản hoặc mật khẩu!");
     }
 }
 
-function logout(){
-    location.reload();
+// REGISTER
+function register(){
+    let u = regUser.value;
+    let p = regPass.value;
+
+    if(localStorage.getItem(u)){
+        alert("Tài khoản đã tồn tại!");
+        return;
+    }
+    localStorage.setItem(u,p);
+    localStorage.setItem(u+"_score",0);
+    alert("Tạo thành công!");
 }
 
-function loadScore(){
-    let s = localStorage.getItem(currentUser+"_score") || 0;
-    score.innerText = s;
+// START QUIZ
+function startQuiz(){
+    classLevel = parseInt(classSelect.value);
+    quizArea.style.display="block";
+    generateQuestion();
 }
 
-// ⏰ BÁO THỨC
-function setAlarm(){
-    let time = alarmTime.value;
-    if(!time) return alert("Chọn giờ!");
+// GENERATE QUESTION
+function generateQuestion(){
 
-    setInterval(()=>{
-        let now = new Date();
-        let current = now.getHours().toString().padStart(2,"0")+":"+now.getMinutes().toString().padStart(2,"0");
-        if(current === time){
-            alert("⏰ Báo thức kêu!");
+    let q = "";
+    let correct;
+
+    if(classLevel <= 4){
+        let a = rand(1,20);
+        let b = rand(1,20);
+        q = a + " + " + b;
+        correct = a + b;
+    }
+
+    else if(classLevel <= 8){
+        let a = rand(2,12);
+        let b = rand(2,12);
+        q = a + " × " + b;
+        correct = a * b;
+    }
+
+    else if(classLevel <= 10){
+        let a = rand(2,5);
+        let b = rand(2,3);
+        q = a + "^" + b;
+        correct = Math.pow(a,b);
+    }
+
+    else{
+        let a = rand(2,10);
+        q = "√" + (a*a);
+        correct = a;
+    }
+
+    answer = correct;
+    question.innerText = q + " = ?";
+
+    createAnswers(correct);
+}
+
+// CREATE ANSWERS
+function createAnswers(correct){
+    answers.innerHTML="";
+    let options = [correct];
+
+    while(options.length<4){
+        let fake = correct + rand(-10,10);
+        if(!options.includes(fake)){
+            options.push(fake);
         }
+    }
+
+    options.sort(()=>Math.random()-0.5);
+
+    options.forEach(opt=>{
+        let btn = document.createElement("button");
+        btn.className="answerBtn";
+        btn.innerText=opt;
+        btn.onclick=function(){checkAnswer(opt)};
+        answers.appendChild(btn);
+    });
+}
+
+// CHECK
+function checkAnswer(choice){
+
+    let buttons = document.querySelectorAll(".answerBtn");
+    buttons.forEach(b=>b.disabled=true);
+
+    if(choice === answer){
+        alert("Đúng!");
+        score += classLevel;
+        localStorage.setItem(currentUser+"_score",score);
+        document.getElementById("score").innerText=score;
+    }else{
+        alert("Sai!");
+    }
+
+    answer=null;
+
+    setTimeout(()=>{
+        generateQuestion();
     },1000);
 }
 
-// 📚 QUIZ
-function startQuiz(){
-    let last = localStorage.getItem(currentUser+"_lastQuiz");
-    let now = Date.now();
-
-    if(last && now - last < 86400000){
-        alert("Bạn đã làm bài hôm nay rồi! 24h sau quay lại.");
-        return;
-    }
-
-    localStorage.setItem(currentUser+"_lastQuiz", now);
-
-    let cls = parseInt(classSelect.value);
-    quizBox.innerHTML = "";
-
-    for(let i=1;i<=10;i++){
-        let a = Math.floor(Math.random()*10);
-        let b = Math.floor(Math.random()*10);
-
-        let div = document.createElement("div");
-        div.innerHTML = `
-            <p>Câu ${i}: ${a} + ${b} = ?
-            <input type="number" id="q${i}">
-            </p>
-        `;
-        quizBox.appendChild(div);
-
-        div.dataset.answer = a+b;
-    }
-
-    let btn = document.createElement("button");
-    btn.innerText="Nộp bài";
-    btn.onclick=function(){submitQuiz(cls)};
-    quizBox.appendChild(btn);
-}
-
-function submitQuiz(cls){
-    let correct = 0;
-    let divs = quizBox.querySelectorAll("div");
-
-    divs.forEach((d,i)=>{
-        let userAns = document.getElementById("q"+(i+1)).value;
-        if(parseInt(userAns) === parseInt(d.dataset.answer)){
-            correct++;
-        }
-    });
-
-    let addScore = correct * cls;
-    let oldScore = parseInt(localStorage.getItem(currentUser+"_score")||0);
-    localStorage.setItem(currentUser+"_score", oldScore + addScore);
-
-    alert("Đúng "+correct+" câu. +" + addScore + " điểm");
-    loadScore();
-    quizBox.innerHTML="";
+// RANDOM
+function rand(min,max){
+    return Math.floor(Math.random()*(max-min+1))+min;
 }
 
 </script>
