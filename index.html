@@ -2,33 +2,27 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>HTHT V9 Ultimate</title>
+<title>HTHT Ultimate</title>
 <style>
-body{margin:0;font-family:Arial;color:white;background:radial-gradient(circle at bottom,#0d1b2a 0%,#000814 70%);} 
-.container{max-width:1000px;margin:auto;padding:20px}
-input,select,button{padding:8px;margin:5px 0;border-radius:8px;border:none}
-button{background:#00b4d8;color:white;font-weight:bold;cursor:pointer}
-.card{background:rgba(255,255,255,0.07);padding:15px;border-radius:12px;margin-top:15px}
-.rank-item{display:flex;align-items:center;background:rgba(255,255,255,0.05);padding:8px;border-radius:8px;margin:5px 0}
-.rank-item img{width:40px;height:40px;border-radius:50%;margin-right:10px}
-.footer{text-align:center;margin-top:40px;opacity:0.7}
+body{margin:0;font-family:Arial;background:#0b0f1a;color:white}
+.nav{display:flex;gap:20px;padding:15px;background:#111827;position:sticky;top:0}
+.nav button{background:none;border:none;color:white;font-weight:bold;cursor:pointer}
+.container{padding:20px;max-width:1100px;margin:auto}
+.card{background:#1f2937;padding:15px;border-radius:12px;margin-top:15px}
+input,select,button{padding:8px;border-radius:8px;border:none;margin:5px 0}
+button.action{background:#2563eb;color:white;cursor:pointer}
+.profile-box{display:flex;align-items:center;gap:15px}
+.profile-box img{width:70px;height:70px;border-radius:50%;object-fit:cover;background:white}
+.answer-btn{display:block;width:100%;margin:5px 0;background:#374151;color:white;cursor:pointer}
+.rank-item{display:flex;align-items:center;gap:10px;background:#374151;padding:8px;border-radius:8px;margin:5px 0}
+.rank-item img{width:40px;height:40px;border-radius:50%;object-fit:cover}
+.footer{text-align:center;margin-top:40px;opacity:0.6}
 </style>
 </head>
 <body>
-<div class="container" id="app"></div><script>
+<div id="app"></div><script>
 const USERS_KEY="htht_users";
 const CURRENT_KEY="htht_current";
-const VERSION="V9";
-
-const PROVINCES=[
-"Hà Nội","TP.HCM","Đà Nẵng","Hải Phòng","Cần Thơ",
-"An Giang","Bà Rịa - Vũng Tàu","Bắc Giang","Bắc Kạn","Bạc Liêu",
-"Bắc Ninh","Bến Tre","Bình Định","Bình Dương","Bình Phước",
-"Bình Thuận","Cà Mau","Cao Bằng","Đắk Lắk","Đắk Nông",
-"Điện Biên","Đồng Nai","Đồng Tháp","Gia Lai","Hà Giang",
-"Hà Nam","Hà Tĩnh","Hải Dương","Hậu Giang","Hòa Bình",
-"Hưng Yên","Khánh Hòa","Kiên Giang","Kon Tum"
-];
 
 function getUsers(){return JSON.parse(localStorage.getItem(USERS_KEY))||[]}
 function saveUsers(u){localStorage.setItem(USERS_KEY,JSON.stringify(u))}
@@ -36,154 +30,146 @@ function getCurrent(){return localStorage.getItem(CURRENT_KEY)}
 function setCurrent(u){localStorage.setItem(CURRENT_KEY,u)}
 function logout(){localStorage.removeItem(CURRENT_KEY);location.reload()}
 
-// ===== REGISTER =====
+function renderLogin(){
+document.getElementById("app").innerHTML=`
+<div class='container'>
+<h2>HTHT Đăng nhập</h2>
+<input id='lUser' placeholder='Tài khoản'><br>
+<input id='lPass' type='password' placeholder='Mật khẩu'><br>
+<button class='action' onclick='login()'>Đăng nhập</button>
+<hr>
+<h3>Đăng ký</h3>
+<input id='rUser' placeholder='Tài khoản'><br>
+<input id='rPass' type='password' placeholder='Mật khẩu'><br>
+<select id='rGrade'>${[...Array(12)].map((_,i)=>`<option>${i+1}</option>`).join('')}</select><br>
+<button class='action' onclick='register()'>Tạo tài khoản</button>
+</div>`}
+
 function register(){
 let users=getUsers();
 let u=rUser.value.trim();
 let p=rPass.value.trim();
-let grade=parseInt(rGrade.value);
+let g=parseInt(rGrade.value);
 if(!u||!p)return alert("Nhập đủ!");
 if(users.find(x=>x.username===u))return alert("Tồn tại!");
-users.push({username:u,password:p,grade:grade,score:0,daily:0,last:"",province:"",school:"",class:"",avatar:"",alarms:[]});
-saveUsers(users);
-alert("Đăng ký thành công");renderLogin();}
+users.push({username:u,password:p,grade:g,score:0,avatar:"",daily:0,last:"",alarms:[]});
+saveUsers(users);alert("OK");renderLogin()}
 
 function login(){
 let u=lUser.value.trim();
 let p=lPass.value.trim();
 let user=getUsers().find(x=>x.username===u&&x.password===p);
 if(!user)return alert("Sai!");
-setCurrent(u);renderHome();}
+setCurrent(u);renderHome()}
 
 function dailyCheck(user){
 let today=new Date().toLocaleDateString();
 if(user.last!==today){user.last=today;user.daily=0}
 if(user.daily>=10)return false;
-user.daily++;return true;}
+user.daily++;return true}
 
-function generateQuestion(grade){
-let q,a;
-if(grade<=3){let x=Math.floor(Math.random()*10);let y=Math.floor(Math.random()*10);q=`${x}+${y}=?`;a=x+y;}
-else if(grade<=6){let x=Math.floor(Math.random()*10+1);q=`${x}²=?`;a=x*x;}
-else if(grade<=9){let x=Math.floor(Math.random()*10+1);q=`√${x*x}=?`;a=x;}
-else{let x=Math.floor(Math.random()*5+1);q=`Giải: 2x+3=${2*x+3}. x=?`;a=x;}
-return{question:q,answer:a};}
+function generateQuestion(g){
+let q,correct,answers=[];
+if(g<=3){let a=Math.floor(Math.random()*10);let b=Math.floor(Math.random()*10);correct=a+b;q=`${a}+${b}=?`}
+else if(g<=6){let a=Math.floor(Math.random()*10)+1;correct=a*a;q=`${a}²=?`}
+else if(g<=9){let a=Math.floor(Math.random()*10)+1;correct=a;q=`√${a*a}=?`}
+else{let x=Math.floor(Math.random()*5)+1;correct=x;q=`2x+3=${2*x+3}. x=?`}
+answers.push(correct);
+while(answers.length<4){let fake=correct+Math.floor(Math.random()*5)-2;if(!answers.includes(fake))answers.push(fake)}
+answers.sort(()=>Math.random()-0.5);
+return{q,correct,answers}}
 
-function doQuiz(){
-let users=getUsers();
-let user=users.find(x=>x.username===getCurrent());
-if(!dailyCheck(user))return alert("Đủ 10 lần!");
-let qa=generateQuestion(user.grade);
-let reply=prompt(qa.question);
-if(reply==qa.answer){user.score+=user.grade;alert("Đúng +"+user.grade);}else alert("Sai! Đáp án: "+qa.answer);
-saveUsers(users);renderHome();}
+function renderHome(){
+let user=getUsers().find(x=>x.username===getCurrent());
+document.getElementById("app").innerHTML=`
+<div class='nav'>
+<button onclick='showSection("alarm")'>Báo thức</button>
+<button onclick='showSection("quiz")'>Bài tập</button>
+<button onclick='showSection("rank")'>Bảng xếp hạng</button>
+<button onclick='logout()'>Đăng xuất</button>
+</div>
+<div class='container'>
+<div class='profile-box'>
+<img src='${user.avatar||""}' id='avatarImg'>
+<div>
+<b>${user.username}</b><br>
+Lớp ${user.grade} | Điểm: ${user.score}<br>
+<input type='file' onchange='uploadAvatar(event)'>
+</div>
+</div>
+<div id='content'></div>
+<div class='footer'>Admin: 0585256245</div>
+</div>`;
+showSection("quiz")}
 
-// ===== PROFILE =====
-function saveProfile(){
-let users=getUsers();
-let user=users.find(x=>x.username===getCurrent());
-user.province=province.value;
-user.school=school.value;
-user.class=className.value;
-saveUsers(users);alert("Đã lưu profile");renderHome();}
-
-function uploadAvatar(input){
+function uploadAvatar(e){
+let file=e.target.files[0];
 let reader=new FileReader();
 reader.onload=function(){
 let users=getUsers();
 let user=users.find(x=>x.username===getCurrent());
 user.avatar=reader.result;
-saveUsers(users);renderHome();}
-reader.readAsDataURL(input.files[0]);}
+saveUsers(users);
+renderHome()}
+reader.readAsDataURL(file)}
 
-// ===== ALARM =====
+function showSection(type){
+let user=getUsers().find(x=>x.username===getCurrent());
+if(type=="quiz"){
+let q=generateQuestion(user.grade);
+window.currentAnswer=q.correct;
+document.getElementById("content").innerHTML=`
+<div class='card'>
+<h3>${q.q}</h3>
+${q.answers.map(a=>`<button class='answer-btn' onclick='checkAnswer(${a})'>${a}</button>`).join('')}
+</div>`}
+
+if(type=="rank"){
+let users=getUsers().sort((a,b)=>b.score-a.score);
+document.getElementById("content").innerHTML=`
+<div class='card'>
+<h3>Bảng xếp hạng</h3>
+${users.map((u,i)=>`
+<div class='rank-item'>
+<img src='${u.avatar||""}'>
+${i+1}. ${u.username} - ${u.score} điểm
+</div>`).join('')}
+</div>`}
+
+if(type=="alarm"){
+document.getElementById("content").innerHTML=`
+<div class='card'>
+<h3>Báo thức</h3>
+<input id='alarmName' placeholder='Tên'>
+<input id='alarmTime' type='time'>
+<button class='action' onclick='addAlarm()'>Thêm</button>
+<div id='alarmList'></div>
+</div>`;
+renderAlarms()}}
+
+function checkAnswer(a){
+let users=getUsers();
+let user=users.find(x=>x.username===getCurrent());
+if(!dailyCheck(user))return alert("Đủ 10 lần hôm nay!");
+if(a==window.currentAnswer){user.score+=user.grade;alert("Đúng +"+user.grade)}else alert("Sai!");
+saveUsers(users);renderHome()}
+
 function addAlarm(){
 let users=getUsers();
 let user=users.find(x=>x.username===getCurrent());
-let name=alarmName.value;
-let time=alarmTime.value;
-if(!name||!time)return alert("Nhập đủ!");
-user.alarms.push({name,time});
-saveUsers(users);renderHome();}
+user.alarms.push({name:alarmName.value,time:alarmTime.value});
+saveUsers(users);renderAlarms()}
+
+function renderAlarms(){
+let user=getUsers().find(x=>x.username===getCurrent());
+document.getElementById("alarmList").innerHTML=user.alarms.map((a,i)=>
+`<div>${a.name} - ${a.time} <button onclick='deleteAlarm(${i})'>X</button></div>`).join('')}
 
 function deleteAlarm(i){
 let users=getUsers();
 let user=users.find(x=>x.username===getCurrent());
 user.alarms.splice(i,1);
-saveUsers(users);renderHome();}
-
-// ===== RANKING =====
-function renderRanking(){
-let users=getUsers().sort((a,b)=>b.score-a.score);
-return users.map((u,i)=>`
-<div class='rank-item'>
-<img src='${u.avatar||"https://via.placeholder.com/40"}'>
-<div>
-${i+1}. ${u.username} (Lớp ${u.grade}) - ${u.score}đ<br>
-<small>${u.province||""} | ${u.school||""} | ${u.class||""}</small>
-</div>
-</div>`).join("");}
-
-function renderHome(){
-let user=getUsers().find(x=>x.username===getCurrent());
-let provinceOptions=PROVINCES.map(p=>`<option ${p==user.province?"selected":""}>${p}</option>`).join("");
-let alarmHTML=user.alarms.map((a,i)=>`${a.name} - ${a.time} <button onclick='deleteAlarm(${i})'>X</button><br>`).join("");
-
-app.innerHTML=`
-<h2>Xin chào ${user.username}</h2>
-<div class='card'>
-<p>Lớp: ${user.grade}</p>
-<p>Điểm: <b>${user.score}</b></p>
-<p>Lượt hôm nay: ${user.daily}/10</p>
-<button onclick='doQuiz()'>Làm bài</button>
-<button onclick='logout()'>Đăng xuất</button>
-</div>
-
-<div class='card'>
-<h3>Profile</h3>
-<img src='${user.avatar||"https://via.placeholder.com/80"}' width='80' style='border-radius:50%'><br>
-<input type='file' onchange='uploadAvatar(this)'><br>
-<select id='province'>${provinceOptions}</select><br>
-<input id='school' placeholder='Trường' value='${user.school||""}'><br>
-<input id='className' placeholder='Lớp (vd: 12A1)' value='${user.class||""}'><br>
-<button onclick='saveProfile()'>Lưu Profile</button>
-</div>
-
-<div class='card'>
-<h3>Báo thức</h3>
-<input id='alarmName' placeholder='Tên báo thức'>
-<input id='alarmTime' type='time'>
-<button onclick='addAlarm()'>Thêm</button><br>
-${alarmHTML}
-</div>
-
-<div class='card'>
-<h3>Bảng xếp hạng</h3>
-${renderRanking()}
-</div>
-
-<div class='footer'>HTHT ${VERSION} | Liên hệ admin: 0585256245</div>
-`}
-
-function renderLogin(){
-app.innerHTML=`
-<h2>Đăng nhập</h2>
-<input id='lUser' placeholder='Tài khoản'>
-<input id='lPass' type='password' placeholder='Mật khẩu'>
-<button onclick='login()'>Đăng nhập</button>
-<p>Chưa có tài khoản?</p>
-<button onclick='renderRegister()'>Đăng ký</button>`}
-
-function renderRegister(){
-let gradeOptions="";
-for(let i=1;i<=12;i++){gradeOptions+=`<option value='${i}'>Lớp ${i}</option>`}
-app.innerHTML=`
-<h2>Đăng ký</h2>
-<input id='rUser' placeholder='Tài khoản'>
-<input id='rPass' type='password' placeholder='Mật khẩu'>
-<select id='rGrade'>${gradeOptions}</select>
-<button onclick='register()'>Tạo tài khoản</button>
-<button onclick='renderLogin()'>Quay lại</button>`}
+saveUsers(users);renderAlarms()}
 
 if(getCurrent())renderHome();else renderLogin();
 </script></body>
