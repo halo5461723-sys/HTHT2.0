@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Báo Thức</title>
+<title>Báo Thức Vũ Trụ</title>
 
 <style>
 body {
@@ -13,19 +13,28 @@ body {
   justify-content: center;
   align-items: center;
   flex-direction: column;
-  background: white;   /* nền trắng đơn giản */
+  color: white;
+
+  /* Background vũ trụ gradient */
+  background: radial-gradient(circle at top, #1a2a6c, #000000);
 }
 
 .container {
+  background: rgba(0, 0, 0, 0.6);
   padding: 30px;
   border-radius: 20px;
   text-align: center;
+  box-shadow: 0 0 40px rgba(0,0,0,0.8);
+}
+
+h1 {
+  margin-bottom: 20px;
 }
 
 input {
   padding: 10px;
   border-radius: 10px;
-  border: 1px solid #ccc;
+  border: none;
   margin: 5px;
 }
 
@@ -33,13 +42,14 @@ button {
   padding: 10px 20px;
   border-radius: 10px;
   border: none;
-  background: #007bff;
+  background: #00c3ff;
   color: white;
   cursor: pointer;
+  transition: 0.3s;
 }
 
 button:hover {
-  background: #0056b3;
+  background: #0099cc;
 }
 </style>
 </head>
