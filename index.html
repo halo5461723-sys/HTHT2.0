@@ -2,201 +2,187 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>HTHT V4</title>
+<title>HTHT V6 Multi User Stable</title>
 <style>
-body{font-family:Arial;margin:0;color:#fff;background:radial-gradient(ellipse at bottom,#0d1b2a 0%,#000814 70%);overflow-x:hidden}
-body::before{
-content:"";
-position:fixed;
-top:0;left:0;
-width:100%;height:100%;
-background-image:
-radial-gradient(2px 2px at 20% 30%,white,transparent),
-radial-gradient(1.5px 1.5px at 70% 40%,white,transparent),
-radial-gradient(1.5px 1.5px at 50% 80%,white,transparent),
-radial-gradient(2px 2px at 90% 20%,white,transparent),
-radial-gradient(1px 1px at 10% 70%,white,transparent);
-background-repeat:repeat;
-animation:starsMove 60s linear infinite;
-z-index:-1;
+body{
+  font-family:Arial;
+  margin:0;
+  color:#fff;
+  background:radial-gradient(ellipse at bottom,#0d1b2a 0%,#000814 70%);
 }
-@keyframes starsMove{
-from{transform:translateY(0)}
-to{transform:translateY(-1000px)}
-}
-header{padding:15px;background:#1e1e1e;display:flex;align-items:center}
-#avatarPreview{width:40px;height:40px;border-radius:50%;object-fit:cover;margin-right:10px}
-.container{padding:20px}
-input,select,button{padding:8px;margin:5px 0;border-radius:6px;border:none}
-button{background:#00c853;color:#fff;cursor:pointer}
-.card{background:#1c1c1c;padding:15px;border-radius:10px;margin-bottom:15px}
-.leaderboard-item{display:flex;align-items:center;justify-content:space-between;padding:8px;border-bottom:1px solid #333}
-.leaderboard-left{display:flex;align-items:center}
-.leaderboard-left img{width:35px;height:35px;border-radius:50%;margin-right:10px}
-.small{font-size:12px;color:#bbb}
-.alarm-item{display:flex;justify-content:space-between;align-items:center;background:#222;padding:8px;border-radius:6px;margin-top:5px}
-footer{background:#1e1e1e;padding:15px;text-align:center;margin-top:20px}
+.container{max-width:500px;margin:auto;padding:20px}
+input,button{padding:10px;margin:5px 0;width:100%;border-radius:8px;border:none}
+button{background:#00b4d8;color:#fff;font-weight:bold;cursor:pointer}
+.card{background:rgba(255,255,255,0.07);padding:15px;border-radius:12px;margin-top:15px}
+.rank-item{background:rgba(255,255,255,0.05);padding:8px;border-radius:8px;margin:5px 0}
 </style>
 </head>
 <body>
-<header>
-<img id="avatarPreview" src="https://via.placeholder.com/40">
-<div id="headerName">Chưa đăng nhập</div>
-</header><div class="container"><div id="authSection" class="card">
-<h3>Đăng nhập / Đăng ký</h3>
-<input id="username" placeholder="Tên đăng nhập">
-<input id="password" type="password" placeholder="Mật khẩu">
-<button onclick="register()">Tạo tài khoản</button>
-<button onclick="login()">Đăng nhập</button>
-</div><div id="mainSection" style="display:none"><div class="card">
-<h3>Profile</h3>
-<input type="file" id="avatarInput" accept="image/*">
-<select id="province">
-<option value="">Chọn tỉnh</option>
-<option>Hà Nội</option>
-<option>TP.HCM</option>
-<option>Đồng Nai</option>
-<option>Bình Dương</option>
-<option>Cần Thơ</option>
-<option>Đà Nẵng</option>
-</select>
-<input id="school" placeholder="Trường (tuỳ chọn)">
-<input id="className" placeholder="Lớp (tuỳ chọn)">
-<button onclick="saveProfile()">Lưu profile</button>
-</div><div class="card">
-<h3>Làm bài (Giới hạn 10 lần/ngày)</h3>
-<button onclick="startQuiz()">Làm bài</button>
-<div id="quizResult"></div>
-</div><div class="card">
-<h3>Báo thức</h3>
-<input id="alarmName" placeholder="Tên báo thức">
-<input type="time" id="alarmTime">
-<button onclick="addAlarm()">Thêm</button>
-<div id="alarmList"></div>
-</div><div class="card">
-<h3>Bảng xếp hạng</h3>
-<div id="leaderboard"></div>
-</div></div></div><footer>
-<div>Liên hệ admin: 0585256245</div>
-<div id="version">Phiên bản V4</div>
-</footer><script>
-let currentUser=null;
+<div class="container" id="app"></div><script>
 
-function getUsers(){return JSON.parse(localStorage.getItem("htht_users"))||[]}
-function saveUsers(users){localStorage.setItem("htht_users",JSON.stringify(users))}
+// ===== STORAGE KEYS =====
+const USERS_KEY = "htht_users";
+const CURRENT_KEY = "htht_current";
 
+// ===== GET USERS =====
+function getUsers(){
+  return JSON.parse(localStorage.getItem(USERS_KEY)) || [];
+}
+
+function saveUsers(users){
+  localStorage.setItem(USERS_KEY, JSON.stringify(users));
+}
+
+function getCurrentUser(){
+  return localStorage.getItem(CURRENT_KEY);
+}
+
+function setCurrentUser(username){
+  localStorage.setItem(CURRENT_KEY, username);
+}
+
+function logout(){
+  localStorage.removeItem(CURRENT_KEY);
+  location.reload();
+}
+
+// ===== REGISTER =====
 function register(){
-let users=getUsers();
-let u=username.value;
-let p=password.value;
-if(users.find(x=>x.username===u)) return alert("Tài khoản tồn tại");
-users.push({username:u,password:p,score:0,dailyCount:0,lastDate:"",alarms:[]});
-saveUsers(users);
-alert("Tạo thành công");
+  const username = document.getElementById("regUser").value.trim();
+  const password = document.getElementById("regPass").value.trim();
+
+  if(!username || !password){
+    alert("Nhập đầy đủ thông tin!");
+    return;
+  }
+
+  let users = getUsers();
+
+  if(users.find(u=>u.username===username)){
+    alert("Tài khoản đã tồn tại!");
+    return;
+  }
+
+  users.push({
+    username,
+    password,
+    score:0,
+    dailyCount:0,
+    lastDate:""
+  });
+
+  saveUsers(users);
+  alert("Đăng ký thành công!");
+  renderLogin();
 }
 
+// ===== LOGIN =====
 function login(){
-let users=getUsers();
-let u=users.find(x=>x.username===username.value && x.password===password.value);
-if(!u) return alert("Sai tài khoản");
-currentUser=u;
-document.getElementById("authSection").style.display="none";
-document.getElementById("mainSection").style.display="block";
-headerName.innerText=u.username;
-avatarPreview.src=u.avatar||"https://via.placeholder.com/40";
-renderLeaderboard();
-renderAlarms();
+  const username = document.getElementById("loginUser").value.trim();
+  const password = document.getElementById("loginPass").value.trim();
+
+  const users = getUsers();
+  const user = users.find(u=>u.username===username && u.password===password);
+
+  if(!user){
+    alert("Sai tài khoản hoặc mật khẩu!");
+    return;
+  }
+
+  setCurrentUser(username);
+  renderHome();
 }
 
-function saveProfile(){
-let users=getUsers();
-let u=users.find(x=>x.username===currentUser.username);
-u.province=province.value;
-u.school=school.value;
-u.className=className.value;
-if(avatarInput.files[0]){
-let reader=new FileReader();
-reader.onload=function(e){
-u.avatar=e.target.result;
-saveUsers(users);
-avatarPreview.src=u.avatar;
-renderLeaderboard();
-};
-reader.readAsDataURL(avatarInput.files[0]);
+// ===== DAILY LIMIT =====
+function canDoQuiz(user){
+  const today = new Date().toLocaleDateString();
+
+  if(user.lastDate !== today){
+    user.lastDate = today;
+    user.dailyCount = 0;
+  }
+
+  if(user.dailyCount >= 10){
+    alert("Hôm nay đủ 10 lần rồi!");
+    return false;
+  }
+
+  user.dailyCount++;
+  return true;
+}
+
+// ===== DO QUIZ =====
+function doQuiz(){
+  let users = getUsers();
+  let username = getCurrentUser();
+  let user = users.find(u=>u.username===username);
+
+  if(!canDoQuiz(user)) return;
+
+  user.score += 10;
+
+  saveUsers(users);
+  renderHome();
+}
+
+// ===== RANKING =====
+function renderRanking(){
+  let users = getUsers();
+  users.sort((a,b)=>b.score-a.score);
+
+  return users.map((u,i)=>
+    `<div class="rank-item">${i+1}. ${u.username} - ${u.score} điểm</div>`
+  ).join("");
+}
+
+// ===== HOME =====
+function renderHome(){
+  let users = getUsers();
+  let username = getCurrentUser();
+  let user = users.find(u=>u.username===username);
+
+  document.getElementById("app").innerHTML = `
+    <h2>Xin chào ${user.username}</h2>
+    <div class="card">
+      <p>Điểm: <b>${user.score}</b></p>
+      <p>Lần hôm nay: ${user.dailyCount}/10</p>
+      <button onclick="doQuiz()">Làm bài (+10)</button>
+      <button onclick="logout()">Đăng xuất</button>
+    </div>
+    <h3>Bảng xếp hạng</h3>
+    ${renderRanking()}
+  `;
+}
+
+// ===== LOGIN FORM =====
+function renderLogin(){
+  document.getElementById("app").innerHTML = `
+    <h2>Đăng nhập</h2>
+    <input id="loginUser" placeholder="Tài khoản">
+    <input id="loginPass" type="password" placeholder="Mật khẩu">
+    <button onclick="login()">Đăng nhập</button>
+    <p>Chưa có tài khoản?</p>
+    <button onclick="renderRegister()">Đăng ký</button>
+  `;
+}
+
+// ===== REGISTER FORM =====
+function renderRegister(){
+  document.getElementById("app").innerHTML = `
+    <h2>Đăng ký</h2>
+    <input id="regUser" placeholder="Tài khoản">
+    <input id="regPass" type="password" placeholder="Mật khẩu">
+    <button onclick="register()">Tạo tài khoản</button>
+    <button onclick="renderLogin()">Quay lại</button>
+  `;
+}
+
+// ===== START =====
+if(getCurrentUser()){
+  renderHome();
 }else{
-saveUsers(users);
-renderLeaderboard();
-}
-alert("Đã lưu profile");
+  renderLogin();
 }
 
-function canDoQuiz(){
-let users=getUsers();
-let u=users.find(x=>x.username===currentUser.username);
-let today=new Date().toLocaleDateString();
-if(u.lastDate!==today){u.lastDate=today;u.dailyCount=0}
-if(u.dailyCount>=10) return false;
-u.dailyCount++;
-saveUsers(users);
-return true;
-}
-
-function startQuiz(){
-if(!canDoQuiz()) return alert("Hôm nay đã đủ 10 lần!");
-let users=getUsers();
-let u=users.find(x=>x.username===currentUser.username);
-u.score+=10;
-saveUsers(users);
-quizResult.innerText="+10 điểm";
-renderLeaderboard();
-}
-
-function renderLeaderboard(){
-let users=getUsers();
-users.sort((a,b)=>b.score-a.score);
-leaderboard.innerHTML="";
-users.forEach((u,i)=>{
-let div=document.createElement("div");
-div.className="leaderboard-item";
-div.innerHTML=`
-<div class="leaderboard-left">
-<img src="${u.avatar||'https://via.placeholder.com/40'}">
-<div>
-<div>${i+1}. ${u.username}</div>
-<div class="small">${u.province||''}${u.school?' • '+u.school:''}${u.className?' • '+u.className:''}</div>
-</div>
-</div>
-<div>${u.score||0} điểm</div>`;
-leaderboard.appendChild(div);
-});
-}
-
-function addAlarm(){
-let users=getUsers();
-let u=users.find(x=>x.username===currentUser.username);
-u.alarms.push({name:alarmName.value,time:alarmTime.value});
-saveUsers(users);
-renderAlarms();
-}
-
-function renderAlarms(){
-let users=getUsers();
-let u=users.find(x=>x.username===currentUser.username);
-alarmList.innerHTML="";
-(u.alarms||[]).forEach((a,i)=>{
-let div=document.createElement("div");
-div.className="alarm-item";
-div.innerHTML=`${a.name} - ${a.time} <button onclick="deleteAlarm(${i})">X</button>`;
-alarmList.appendChild(div);
-});
-}
-
-function deleteAlarm(i){
-let users=getUsers();
-let u=users.find(x=>x.username===currentUser.username);
-u.alarms.splice(i,1);
-saveUsers(users);
-renderAlarms();
-}
 </script></body>
 </html>
