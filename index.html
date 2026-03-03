@@ -3,92 +3,27 @@
 <meta charset="UTF-8">
 <title>HTHT học tập web</title>
 <style>
-body{
-    font-family: Arial;
-    text-align:center;
-    background: linear-gradient(135deg,#667eea,#764ba2);
-    color:white;
-    margin:0;
-}
-.header{
-    display:flex;
-    align-items:center;
-    padding:10px;
-}
-.avatarBox{
-    width:60px;
-    height:60px;
-    border-radius:50%;
-    overflow:hidden;
-    background:white;
-    margin-right:10px;
-}
-.avatarBox img{
-    width:100%;
-    height:100%;
-    object-fit:cover;
-}
-.box{
-    background:white;
-    color:black;
-    width:360px;
-    margin:20px auto;
-    padding:20px;
-    border-radius:15px;
-}
-input,select{
-    width:90%;
-    padding:8px;
-}
-button{
-    padding:8px 12px;
-    margin:5px;
-    border:none;
-    border-radius:8px;
-    cursor:pointer;
-}
-.answerBtn{
-    width:100%;
-    margin-top:5px;
-}
-.leaderboard-item{
-    display:flex;
-    align-items:center;
-    margin:8px 0;
-    text-align:left;
-}
-.leaderboard-item img{
-    width:35px;
-    height:35px;
-    border-radius:50%;
-    margin-right:8px;
-    object-fit:cover;
-}
-.alarm-item{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    background:#f1f1f1;
-    padding:6px;
-    border-radius:8px;
-    margin-top:6px;
-    font-size:14px;
-}
-.footer{
-    margin-top:30px;
-    padding:15px;
-    background:rgba(0,0,0,0.3);
-}
+body{font-family:Arial;text-align:center;background:linear-gradient(135deg,#667eea,#764ba2);color:white;margin:0;}
+.header{display:flex;align-items:center;padding:10px;}
+.avatarBox{width:60px;height:60px;border-radius:50%;overflow:hidden;background:white;margin-right:10px;}
+.avatarBox img{width:100%;height:100%;object-fit:cover;}
+.box{background:white;color:black;width:360px;margin:20px auto;padding:20px;border-radius:15px;}
+input,select{width:90%;padding:8px;margin-top:4px;}
+button{padding:8px 12px;margin:5px;border:none;border-radius:8px;cursor:pointer;}
+.answerBtn{width:100%;margin-top:5px;}
+.leaderboard-item{display:flex;align-items:center;margin:8px 0;text-align:left;}
+.leaderboard-item img{width:35px;height:35px;border-radius:50%;margin-right:8px;object-fit:cover;}
+.alarm-item{display:flex;justify-content:space-between;align-items:center;background:#f1f1f1;padding:6px;border-radius:8px;margin-top:6px;font-size:14px;}
+.profile-box{background:#f7f7f7;padding:8px;border-radius:8px;margin-top:8px;font-size:13px;text-align:left;}
+.footer{margin-top:30px;padding:15px;background:rgba(0,0,0,0.3);} 
 </style>
 </head>
 <body><div class="header" id="userHeader" style="display:none;">
-    <div class="avatarBox">
-        <img id="avatarImg" src="" alt="avatar">
-    </div>
-    <div>
-        <div id="welcomeUser"></div>
-        <input type="file" accept="image/*" onchange="uploadAvatar(event)">
-    </div>
+<div class="avatarBox"><img id="avatarImg" src=""></div>
+<div>
+<div id="welcomeUser"></div>
+<input type="file" accept="image/*" onchange="uploadAvatar(event)">
+</div>
 </div><h1>HTHT Học Tập Web</h1><div class="box" id="authBox">
 <h3>Đăng nhập</h3>
 <input id="loginUser" placeholder="Tên tài khoản"><br><br>
@@ -100,6 +35,12 @@ button{
 <input id="regPass" type="password" placeholder="Mật khẩu"><br><br>
 <button onclick="register()">Tạo tài khoản</button>
 </div><div class="box" id="mainWeb" style="display:none;">
+<h3>👤 Profile</h3>
+<input id="schoolInput" placeholder="Tên trường (không bắt buộc)">
+<input id="classInput" placeholder="Lớp (không bắt buộc)">
+<input id="provinceInput" placeholder="Tỉnh/Thành (không bắt buộc)">
+<button onclick="saveProfile()">Lưu profile</button>
+<div id="profileDisplay" class="profile-box"></div><hr>
 <h3>Chọn lớp</h3>
 <select id="classSelect">
 <option value="1">Lớp 1-4 (Cộng)</option>
@@ -109,7 +50,7 @@ button{
 </select>
 <button onclick="startQuiz()">Làm bài</button>
 <h3>Điểm: <span id="score">0</span></h3><hr>
-<h3>⏰ Báo thức học bài</h3>
+<h3>⏰ Báo thức</h3>
 <input id="alarmName" placeholder="Tên báo thức"><br>
 <input type="time" id="alarmTime"><br>
 <button onclick="addAlarm()">Thêm báo thức</button>
@@ -124,13 +65,12 @@ button{
 Chi tiết liên hệ admin: 0585256245<br>
 <div id="versionText"></div>
 </div><script>
-
-let VERSION=2;
+let VERSION=3;
 document.getElementById("versionText").innerText="Bản cập nhật V"+VERSION;
 
 if(!localStorage.getItem("Hthtadmin")){
-    localStorage.setItem("Hthtadmin","đkjsksjbdnd");
-    localStorage.setItem("Hthtadmin_score",0);
+localStorage.setItem("Hthtadmin","đkjsksjbdnd");
+localStorage.setItem("Hthtadmin_score",0);
 }
 
 let currentUser="";
@@ -140,228 +80,122 @@ let level=1;
 let alarms=[];
 
 function login(){
-    let u=loginUser.value;
-    let p=loginPass.value;
-    let saved=localStorage.getItem(u);
-
-    if(saved===p){
-        currentUser=u;
-        score=parseInt(localStorage.getItem(u+"_score"))||0;
-        document.getElementById("score").innerText=score;
-        authBox.style.display="none";
-        mainWeb.style.display="block";
-        userHeader.style.display="flex";
-        welcomeUser.innerText="Xin chào, "+u;
-        loadAvatar();
-        updateLeaderboard();
-        loadAlarms();
-    }else{
-        alert("Sai tài khoản hoặc mật khẩu!");
-    }
+let u=loginUser.value;
+let p=loginPass.value;
+if(localStorage.getItem(u)===p){
+currentUser=u;
+score=parseInt(localStorage.getItem(u+"_score"))||0;
+document.getElementById("score").innerText=score;
+authBox.style.display="none";
+mainWeb.style.display="block";
+userHeader.style.display="flex";
+welcomeUser.innerText="Xin chào, "+u;
+loadAvatar();
+loadProfile();
+updateLeaderboard();
+loadAlarms();
+}else alert("Sai tài khoản!");
 }
 
 function register(){
-    let u=regUser.value;
-    let p=regPass.value;
-
-    if(u===""||p==="") return alert("Nhập đủ thông tin!");
-    if(localStorage.getItem(u)) return alert("Tài khoản đã tồn tại!");
-
-    localStorage.setItem(u,p);
-    localStorage.setItem(u+"_score",0);
-    alert("Tạo thành công!");
+let u=regUser.value;
+let p=regPass.value;
+if(!u||!p) return alert("Nhập đủ thông tin!");
+if(localStorage.getItem(u)) return alert("Tài khoản đã tồn tại!");
+localStorage.setItem(u,p);
+localStorage.setItem(u+"_score",0);
+alert("Tạo thành công!");
 }
 
-function uploadAvatar(event){
-    const file=event.target.files[0];
-    const reader=new FileReader();
-    reader.onload=function(){
-        localStorage.setItem(currentUser+"_avatar",reader.result);
-        avatarImg.src=reader.result;
-        updateLeaderboard();
-    }
-    if(file) reader.readAsDataURL(file);
+function uploadAvatar(e){
+const file=e.target.files[0];
+const reader=new FileReader();
+reader.onload=function(){
+localStorage.setItem(currentUser+"_avatar",reader.result);
+avatarImg.src=reader.result;
+updateLeaderboard();
+}
+if(file) reader.readAsDataURL(file);
+}
+function loadAvatar(){avatarImg.src=localStorage.getItem(currentUser+"_avatar")||"";}
+
+function saveProfile(){
+let profile={
+school:schoolInput.value,
+className:classInput.value,
+province:provinceInput.value
+};
+localStorage.setItem(currentUser+"_profile",JSON.stringify(profile));
+loadProfile();
 }
 
-function loadAvatar(){
-    avatarImg.src=localStorage.getItem(currentUser+"_avatar")||"";
+function loadProfile(){
+let p=JSON.parse(localStorage.getItem(currentUser+"_profile"))||{};
+let text="";
+if(p.school) text+="🏫 Trường: "+p.school+"<br>";
+if(p.className) text+="📚 Lớp: "+p.className+"<br>";
+if(p.province) text+="📍 Tỉnh: "+p.province;
+profileDisplay.innerHTML=text||"Chưa cập nhật thông tin.";
 }
 
 function addAlarm(){
-    let name=document.getElementById("alarmName").value;
-    let time=document.getElementById("alarmTime").value;
-    if(!name||!time) return alert("Nhập đủ tên và giờ!");
-
-    alarms.push({name,time});
-    saveAlarms();
-    renderAlarms();
+let name=alarmName.value;
+let time=alarmTime.value;
+if(!name||!time) return alert("Nhập đủ!");
+alarms.push({name,time});
+saveAlarms();renderAlarms();
 }
-
 function renderAlarms(){
-    alarmList.innerHTML="";
-    alarms.forEach((a,index)=>{
-        let div=document.createElement("div");
-        div.className="alarm-item";
-
-        let text=document.createElement("span");
-        text.innerText=a.name+" - "+a.time;
-        text.onclick=function(){editAlarm(index)};
-
-        let del=document.createElement("button");
-        del.innerText="X";
-        del.onclick=function(){deleteAlarm(index)};
-
-        div.appendChild(text);
-        div.appendChild(del);
-        alarmList.appendChild(div);
-    });
+alarmList.innerHTML="";
+alarms.forEach((a,i)=>{
+let div=document.createElement("div");
+div.className="alarm-item";
+div.innerHTML=`<span onclick="editAlarm(${i})">${a.name} - ${a.time}</span><button onclick="deleteAlarm(${i})">X</button>`;
+alarmList.appendChild(div);
+});}
+function deleteAlarm(i){alarms.splice(i,1);saveAlarms();renderAlarms();}
+function editAlarm(i){
+let n=prompt("Tên:",alarms[i].name);
+let t=prompt("Giờ:",alarms[i].time);
+if(n&&t){alarms[i]={name:n,time:t};saveAlarms();renderAlarms();}
 }
+function saveAlarms(){localStorage.setItem(currentUser+"_alarms",JSON.stringify(alarms));}
+function loadAlarms(){alarms=JSON.parse(localStorage.getItem(currentUser+"_alarms"))||[];renderAlarms();checkAlarm();}
+function checkAlarm(){setInterval(()=>{
+let now=new Date();
+let cur=now.getHours().toString().padStart(2,'0')+":"+now.getMinutes().toString().padStart(2,'0');
+alarms.forEach(a=>{if(a.time===cur) alert("⏰ "+a.name+" - Tới giờ rồi!");});
+},60000);} 
 
-function deleteAlarm(index){
-    alarms.splice(index,1);
-    saveAlarms();
-    renderAlarms();
-}
-
-function editAlarm(index){
-    let newName=prompt("Sửa tên:",alarms[index].name);
-    let newTime=prompt("Sửa giờ (HH:MM):",alarms[index].time);
-    if(newName&&newTime){
-        alarms[index]={name:newName,time:newTime};
-        saveAlarms();
-        renderAlarms();
-    }
-}
-
-function saveAlarms(){
-    localStorage.setItem(currentUser+"_alarms",JSON.stringify(alarms));
-}
-
-function loadAlarms(){
-    alarms=JSON.parse(localStorage.getItem(currentUser+"_alarms"))||[];
-    renderAlarms();
-    checkAlarmLoop();
-}
-
-function checkAlarmLoop(){
-    setInterval(()=>{
-        let now=new Date();
-        let current=now.getHours().toString().padStart(2,'0')+":"+
-                    now.getMinutes().toString().padStart(2,'0');
-        alarms.forEach(a=>{
-            if(a.time===current){
-                alert("⏰ "+a.name+" - Tới giờ rồi!");
-            }
-        });
-    },60000);
-}
-
-function startQuiz(){
-    level=parseInt(classSelect.value);
-    quizArea.style.display="block";
-    generateQuestion();
-}
-
-function rand(min,max){
-    return Math.floor(Math.random()*(max-min+1))+min;
-}
-
+function startQuiz(){level=parseInt(classSelect.value);quizArea.style.display="block";generateQuestion();}
+function rand(min,max){return Math.floor(Math.random()*(max-min+1))+min;}
 function generateQuestion(){
-    let q="";
-    let correct;
-
-    if(level<=4){
-        let a=rand(1,20);
-        let b=rand(1,20);
-        q=a+" + "+b;
-        correct=a+b;
-    }
-    else if(level<=8){
-        let a=rand(2,12);
-        let b=rand(2,12);
-        q=a+" × "+b;
-        correct=a*b;
-    }
-    else if(level<=10){
-        let a=rand(2,5);
-        let b=rand(2,3);
-        q=a+"^"+b;
-        correct=Math.pow(a,b);
-    }
-    else{
-        let a=rand(2,10);
-        q="√"+(a*a);
-        correct=a;
-    }
-
-    answer=correct;
-    question.innerText=q+" = ?";
-    createAnswers(correct);
+let q="",correct;
+if(level<=4){let a=rand(1,20),b=rand(1,20);q=a+" + "+b;correct=a+b;}
+else if(level<=8){let a=rand(2,12),b=rand(2,12);q=a+" × "+b;correct=a*b;}
+else if(level<=10){let a=rand(2,5),b=rand(2,3);q=a+"^"+b;correct=Math.pow(a,b);} 
+else{let a=rand(2,10);q="√"+(a*a);correct=a;}
+answer=correct;question.innerText=q+" = ?";createAnswers(correct);
 }
+function createAnswers(correct){answers.innerHTML="";let ops=[correct];
+while(ops.length<4){let f=correct+rand(-10,10);if(!ops.includes(f)) ops.push(f);} 
+ops.sort(()=>Math.random()-0.5);
+ops.forEach(o=>{let b=document.createElement("button");b.className="answerBtn";b.innerText=o;b.onclick=function(){checkAnswer(o)};answers.appendChild(b);});}
+function checkAnswer(c){if(c===answer){score+=level;localStorage.setItem(currentUser+"_score",score);score.innerText=score;updateLeaderboard();}
+setTimeout(()=>{generateQuestion();},800);} 
 
-function createAnswers(correct){
-    answers.innerHTML="";
-    let options=[correct];
-
-    while(options.length<4){
-        let fake=correct+rand(-10,10);
-        if(!options.includes(fake)) options.push(fake);
-    }
-
-    options.sort(()=>Math.random()-0.5);
-
-    options.forEach(opt=>{
-        let btn=document.createElement("button");
-        btn.className="answerBtn";
-        btn.innerText=opt;
-        btn.onclick=function(){checkAnswer(opt)};
-        answers.appendChild(btn);
-    });
-}
-
-function checkAnswer(choice){
-    if(choice===answer){
-        score+=level;
-        localStorage.setItem(currentUser+"_score",score);
-        document.getElementById("score").innerText=score;
-        updateLeaderboard();
-    }
-    setTimeout(()=>{generateQuestion();},800);
-}
-
-function updateLeaderboard(){
-    leaderboard.innerHTML="";
-    let users=[];
-
-    for(let i=0;i<localStorage.length;i++){
-        let key=localStorage.key(i);
-        if(key.endsWith("_score")){
-            let user=key.replace("_score","");
-            users.push({
-                name:user,
-                score:parseInt(localStorage.getItem(key)),
-                avatar:localStorage.getItem(user+"_avatar")
-            });
-        }
-    }
-
-    users.sort((a,b)=>b.score-a.score);
-
-    users.forEach((u,index)=>{
-        let div=document.createElement("div");
-        div.className="leaderboard-item";
-
-        let img=document.createElement("img");
-        img.src=u.avatar||"";
-
-        let text=document.createElement("span");
-        text.innerText=(index+1)+". "+u.name+" - "+u.score+" điểm";
-
-        div.appendChild(img);
-        div.appendChild(text);
-        leaderboard.appendChild(div);
-    });
-}
+function updateLeaderboard(){leaderboard.innerHTML="";let users=[];
+for(let i=0;i<localStorage.length;i++){
+let key=localStorage.key(i);
+if(key.endsWith("_score")){
+let u=key.replace("_score","");
+users.push({name:u,score:parseInt(localStorage.getItem(key)),avatar:localStorage.getItem(u+"_avatar")});}}
+users.sort((a,b)=>b.score-a.score);
+users.forEach((u,i)=>{
+let div=document.createElement("div");div.className="leaderboard-item";
+div.innerHTML=`<img src="${u.avatar||''}"><span>${i+1}. ${u.name} - ${u.score} điểm</span>`;
+leaderboard.appendChild(div);
+});}
 
 </script></body>
 </html>
