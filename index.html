@@ -2,9 +2,14 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>HTHT Full</title>
+<title>HTHT Web</title>
 <style>
-body{font-family:Arial;background:#eef2ff;text-align:center;margin:0}
+body{
+  font-family: Arial;
+  background:#eef2ff;
+  text-align:center;
+  margin:0;
+}
 .box{
   background:white;
   width:90%;
@@ -21,8 +26,15 @@ input,button{
   border-radius:6px;
   border:1px solid #ccc;
 }
-button{background:#4f46e5;color:white;border:none}
-.hidden{display:none}
+button{
+  background:#4f46e5;
+  color:white;
+  border:none;
+}
+button:active{
+  opacity:0.7;
+}
+.hidden{display:none;}
 img{
   width:100px;
   height:100px;
@@ -34,58 +46,66 @@ img{
 <body>
 
 <div class="box" id="setupBox">
-<h3>Nhập tên của bạn</h3>
-<input type="text" id="nameInput" placeholder="Tên của bạn">
+<h3>Tạo người dùng</h3>
+<input type="text" id="nameInput" placeholder="Nhập tên">
 <input type="file" id="avatarInput" accept="image/*">
-<button onclick="saveUser()">Bắt đầu</button>
+<button id="startBtn">Bắt đầu</button>
 </div>
 
 <div class="box hidden" id="mainBox">
 <h2 id="welcome"></h2>
 
-<button onclick="showProfile()">Profile</button>
-<button onclick="showMath()">Làm Toán</button>
-<button onclick="showRank()">Xếp hạng</button>
+<button id="profileBtn">Profile</button>
+<button id="mathBtn">Làm Toán</button>
+<button id="rankBtn">Xếp hạng</button>
 
 <div id="content"></div>
 </div>
 
 <script>
 
-// ===== LẤY USERS =====
+// ===== LẤY & LƯU USERS =====
 function getUsers(){
   return JSON.parse(localStorage.getItem("users") || "[]");
 }
-function saveUsers(u){
-  localStorage.setItem("users", JSON.stringify(u));
+
+function saveUsers(users){
+  localStorage.setItem("users", JSON.stringify(users));
 }
 
 // ===== TẠO USER =====
-function saveUser(){
-  let name = nameInput.value.trim();
-  let file = avatarInput.files[0];
+document.getElementById("startBtn").addEventListener("click", function(){
 
-  if(!name){ alert("Nhập tên đi 😑"); return; }
+  let name = document.getElementById("nameInput").value.trim();
+  let file = document.getElementById("avatarInput").files[0];
+
+  if(!name){
+    alert("Nhập tên đi 😑");
+    return;
+  }
 
   let users = getUsers();
 
-  if(users.find(u=>u.name===name)){
+  if(users.some(u => u.name === name)){
     alert("Tên đã tồn tại");
     return;
   }
 
   let reader = new FileReader();
+
   reader.onload = function(e){
-    let user = {
-      name:name,
-      avatar:e.target.result || "",
-      score:0
+
+    let newUser = {
+      name: name,
+      avatar: e.target.result || "",
+      score: 0
     };
 
-    users.push(user);
+    users.push(newUser);
     saveUsers(users);
     localStorage.setItem("currentUser", name);
-    showMain(user);
+
+    showMain(newUser);
   };
 
   if(file){
@@ -93,79 +113,89 @@ function saveUser(){
   }else{
     reader.onload({target:{result:""}});
   }
-}
 
-// ===== MAIN =====
+});
+
+// ===== HIỂN THỊ MAIN =====
 function showMain(user){
-  setupBox.classList.add("hidden");
-  mainBox.classList.remove("hidden");
-  welcome.innerText="Xin chào "+user.name;
+  document.getElementById("setupBox").classList.add("hidden");
+  document.getElementById("mainBox").classList.remove("hidden");
+  document.getElementById("welcome").innerText = "Xin chào " + user.name;
 }
 
 // ===== PROFILE =====
-function showProfile(){
-  let users=getUsers();
-  let name=localStorage.getItem("currentUser");
-  let u=users.find(x=>x.name===name);
+document.getElementById("profileBtn").addEventListener("click", function(){
 
-  content.innerHTML=`
-  <h3>Profile</h3>
-  <img src="${u.avatar || 'https://via.placeholder.com/100'}"><br>
-  <p>Tên: ${u.name}</p>
-  <p>Điểm: ${u.score}</p>
+  let users = getUsers();
+  let name = localStorage.getItem("currentUser");
+  let user = users.find(u => u.name === name);
+
+  document.getElementById("content").innerHTML = `
+    <h3>Profile</h3>
+    <img src="${user.avatar || 'https://via.placeholder.com/100'}"><br>
+    <p>Tên: ${user.name}</p>
+    <p>Điểm: ${user.score}</p>
   `;
-}
+});
 
 // ===== TOÁN =====
-let currentAnswer=0;
-function showMath(){
-  let n=Math.floor(Math.random()*50)+1;
-  currentAnswer=Math.sqrt(n).toFixed(2);
-  content.innerHTML=`
-  <h3>√${n} = ? (2 số)</h3>
-  <input id="mathAns">
-  <button onclick="checkMath()">Nộp</button>
+let correctAnswer = 0;
+
+document.getElementById("mathBtn").addEventListener("click", function(){
+
+  let num = Math.floor(Math.random()*50)+1;
+  correctAnswer = Math.sqrt(num).toFixed(2);
+
+  document.getElementById("content").innerHTML = `
+    <h3>√${num} = ? (2 số)</h3>
+    <input id="mathAnswer">
+    <button id="submitMath">Nộp</button>
   `;
-}
 
-function checkMath(){
-  let ans=parseFloat(mathAns.value).toFixed(2);
-  let users=getUsers();
-  let name=localStorage.getItem("currentUser");
-  let u=users.find(x=>x.name===name);
+  document.getElementById("submitMath").addEventListener("click", function(){
 
-  if(ans==currentAnswer){
-    alert("Đúng!");
-    u.score+=10;
-  }else{
-    alert("Sai! Đáp án "+currentAnswer);
-  }
+    let ans = parseFloat(document.getElementById("mathAnswer").value).toFixed(2);
+    let users = getUsers();
+    let name = localStorage.getItem("currentUser");
+    let user = users.find(u => u.name === name);
 
-  saveUsers(users);
-}
+    if(ans === correctAnswer){
+      alert("Đúng!");
+      user.score += 10;
+    }else{
+      alert("Sai! Đáp án: " + correctAnswer);
+    }
 
-// ===== XẾP HẠNG =====
-function showRank(){
-  let users=getUsers();
-  users.sort((a,b)=>b.score-a.score);
-
-  let html="<h3>Bảng xếp hạng</h3>";
-  users.forEach((u,i)=>{
-    html+=`
-    <p>${i+1}. ${u.name} - ${u.score} điểm</p>
-    `;
+    saveUsers(users);
   });
 
-  content.innerHTML=html;
-}
+});
+
+// ===== XẾP HẠNG =====
+document.getElementById("rankBtn").addEventListener("click", function(){
+
+  let users = getUsers();
+  users.sort((a,b) => b.score - a.score);
+
+  let html = "<h3>Bảng xếp hạng</h3>";
+
+  users.forEach((u,i)=>{
+    html += `<p>${i+1}. ${u.name} - ${u.score} điểm</p>`;
+  });
+
+  document.getElementById("content").innerHTML = html;
+
+});
 
 // ===== AUTO LOAD =====
-window.onload=function(){
-  let name=localStorage.getItem("currentUser");
+window.onload = function(){
+  let name = localStorage.getItem("currentUser");
   if(name){
-    let users=getUsers();
-    let u=users.find(x=>x.name===name);
-    if(u) showMain(u);
+    let users = getUsers();
+    let user = users.find(u => u.name === name);
+    if(user){
+      showMain(user);
+    }
   }
 };
 
