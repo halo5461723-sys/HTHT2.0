@@ -2,203 +2,211 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>HTHT Web</title>
+<title>Mini App Nhàn</title>
 <style>
 body{
-  font-family: Arial;
-  background:#eef2ff;
+  font-family:Arial;
+  background:#f4f6ff;
   text-align:center;
-  margin:0;
+  padding:20px;
 }
 .box{
   background:white;
-  width:90%;
-  max-width:420px;
-  margin:20px auto;
   padding:20px;
   border-radius:12px;
-  box-shadow:0 0 10px #ccc;
-}
-input,button{
-  width:95%;
-  padding:10px;
-  margin:6px 0;
-  border-radius:6px;
-  border:1px solid #ccc;
+  box-shadow:0 4px 10px rgba(0,0,0,0.1);
+  margin:auto;
+  max-width:400px;
 }
 button{
-  background:#4f46e5;
-  color:white;
+  padding:8px 14px;
   border:none;
+  border-radius:8px;
+  background:#4e73ff;
+  color:white;
+  margin:5px;
 }
-button:active{
-  opacity:0.7;
+input{
+  padding:6px;
+  margin:5px;
 }
-.hidden{display:none;}
 img{
-  width:100px;
-  height:100px;
+  width:90px;
+  height:90px;
   border-radius:50%;
   object-fit:cover;
+  margin:10px;
+}
+.hidden{display:none;}
+
+.rankBox{
+  border:2px solid #4e73ff;
+  border-radius:10px;
+  padding:10px;
+  margin-top:10px;
+  text-align:left;
+}
+
+.progress{
+  width:100%;
+  background:#ddd;
+  border-radius:10px;
+  height:20px;
+  margin:10px 0;
+}
+.progress-bar{
+  height:100%;
+  width:0%;
+  background:#4e73ff;
+  border-radius:10px;
 }
 </style>
 </head>
+
 <body>
 
 <div class="box" id="setupBox">
-<h3>Tạo người dùng</h3>
-<input type="text" id="nameInput" placeholder="Nhập tên">
-<input type="file" id="avatarInput" accept="image/*">
-<button id="startBtn">Bắt đầu</button>
+<h2>Đặt tên của bạn</h2>
+<input id="nameInput" placeholder="Tên của bạn">
+<input type="file" id="avatarInput">
+<br>
+<button onclick="startApp()">Bắt đầu</button>
 </div>
 
 <div class="box hidden" id="mainBox">
 <h2 id="welcome"></h2>
-
-<button id="profileBtn">Profile</button>
-<button id="mathBtn">Làm Toán</button>
-<button id="rankBtn">Xếp hạng</button>
+<img id="avatarImg">
+<br>
+<button onclick="changeAvatar()">Đổi Avatar</button>
+<button onclick="showProfile()">Profile</button>
+<button onclick="showMath()">Làm toán</button>
+<button onclick="showRank()">BXH</button>
+<button onclick="setAlarm()">Báo thức</button>
 
 <div id="content"></div>
 </div>
 
 <script>
-
-// ===== LẤY & LƯU USERS =====
-function getUsers(){
-  return JSON.parse(localStorage.getItem("users") || "[]");
+function getUser(){
+  return JSON.parse(localStorage.getItem("user")||"null");
 }
 
-function saveUsers(users){
-  localStorage.setItem("users", JSON.stringify(users));
+function saveUser(u){
+  localStorage.setItem("user",JSON.stringify(u));
 }
 
-// ===== TẠO USER =====
-document.getElementById("startBtn").addEventListener("click", function(){
+function startApp(){
+  let name=document.getElementById("nameInput").value.trim();
+  if(!name){alert("Nhập tên!");return;}
 
-  let name = document.getElementById("nameInput").value.trim();
-  let file = document.getElementById("avatarInput").files[0];
+  let file=document.getElementById("avatarInput").files[0];
+  let reader=new FileReader();
 
-  if(!name){
-    alert("Nhập tên đi 😑");
-    return;
-  }
-
-  let users = getUsers();
-
-  if(users.some(u => u.name === name)){
-    alert("Tên đã tồn tại");
-    return;
-  }
-
-  let reader = new FileReader();
-
-  reader.onload = function(e){
-
-    let newUser = {
-      name: name,
-      avatar: e.target.result || "",
-      score: 0
+  reader.onload=function(e){
+    let user={
+      name:name,
+      avatar:e.target.result||"",
+      score:0,
+      exp:0
     };
-
-    users.push(newUser);
-    saveUsers(users);
-    localStorage.setItem("currentUser", name);
-
-    showMain(newUser);
+    saveUser(user);
+    showMain();
   };
 
-  if(file){
-    reader.readAsDataURL(file);
-  }else{
-    reader.onload({target:{result:""}});
-  }
-
-});
-
-// ===== HIỂN THỊ MAIN =====
-function showMain(user){
-  document.getElementById("setupBox").classList.add("hidden");
-  document.getElementById("mainBox").classList.remove("hidden");
-  document.getElementById("welcome").innerText = "Xin chào " + user.name;
+  if(file) reader.readAsDataURL(file);
+  else reader.onload({target:{result:""}});
 }
 
-// ===== PROFILE =====
-document.getElementById("profileBtn").addEventListener("click", function(){
+function showMain(){
+  let u=getUser();
+  document.getElementById("setupBox").classList.add("hidden");
+  document.getElementById("mainBox").classList.remove("hidden");
+  document.getElementById("welcome").innerText="Xin chào "+u.name;
+  document.getElementById("avatarImg").src=u.avatar||"https://via.placeholder.com/90";
+}
 
-  let users = getUsers();
-  let name = localStorage.getItem("currentUser");
-  let user = users.find(u => u.name === name);
+function changeAvatar(){
+  let input=document.createElement("input");
+  input.type="file";
+  input.onchange=function(){
+    let file=input.files[0];
+    let reader=new FileReader();
+    reader.onload=function(e){
+      let u=getUser();
+      u.avatar=e.target.result;
+      saveUser(u);
+      showMain();
+    };
+    reader.readAsDataURL(file);
+  };
+  input.click();
+}
 
-  document.getElementById("content").innerHTML = `
-    <h3>Profile</h3>
-    <img src="${user.avatar || 'https://via.placeholder.com/100'}"><br>
-    <p>Tên: ${user.name}</p>
-    <p>Điểm: ${user.score}</p>
+function showProfile(){
+  let u=getUser();
+  let percent=Math.min((u.exp%100),100);
+
+  document.getElementById("content").innerHTML=`
+  <h3>Profile</h3>
+  <p>Tên: ${u.name}</p>
+  <p>Điểm: ${u.score}</p>
+  <div class="progress">
+    <div class="progress-bar" style="width:${percent}%"></div>
+  </div>
+  <p>EXP: ${u.exp}/100</p>
   `;
-});
+}
 
-// ===== TOÁN =====
-let correctAnswer = 0;
+let currentAnswer=0;
 
-document.getElementById("mathBtn").addEventListener("click", function(){
+function showMath(){
+  let n=Math.floor(Math.random()*100)+1;
+  currentAnswer=Math.sqrt(n).toFixed(2);
 
-  let num = Math.floor(Math.random()*50)+1;
-  correctAnswer = Math.sqrt(num).toFixed(2);
-
-  document.getElementById("content").innerHTML = `
-    <h3>√${num} = ? (2 số)</h3>
-    <input id="mathAnswer">
-    <button id="submitMath">Nộp</button>
+  document.getElementById("content").innerHTML=`
+  <h3>√${n} = ? (2 số thập phân)</h3>
+  <input id="ans">
+  <button onclick="checkAns()">Nộp</button>
   `;
+}
 
-  document.getElementById("submitMath").addEventListener("click", function(){
+function checkAns(){
+  let ans=parseFloat(document.getElementById("ans").value).toFixed(2);
+  let u=getUser();
 
-    let ans = parseFloat(document.getElementById("mathAnswer").value).toFixed(2);
-    let users = getUsers();
-    let name = localStorage.getItem("currentUser");
-    let user = users.find(u => u.name === name);
-
-    if(ans === correctAnswer){
-      alert("Đúng!");
-      user.score += 10;
-    }else{
-      alert("Sai! Đáp án: " + correctAnswer);
-    }
-
-    saveUsers(users);
-  });
-
-});
-
-// ===== XẾP HẠNG =====
-document.getElementById("rankBtn").addEventListener("click", function(){
-
-  let users = getUsers();
-  users.sort((a,b) => b.score - a.score);
-
-  let html = "<h3>Bảng xếp hạng</h3>";
-
-  users.forEach((u,i)=>{
-    html += `<p>${i+1}. ${u.name} - ${u.score} điểm</p>`;
-  });
-
-  document.getElementById("content").innerHTML = html;
-
-});
-
-// ===== AUTO LOAD =====
-window.onload = function(){
-  let name = localStorage.getItem("currentUser");
-  if(name){
-    let users = getUsers();
-    let user = users.find(u => u.name === name);
-    if(user){
-      showMain(user);
-    }
+  if(ans==currentAnswer){
+    alert("Đúng!");
+    u.score+=10;
+    u.exp+=20;
+  }else{
+    alert("Sai! Đáp án "+currentAnswer);
   }
-};
 
+  saveUser(u);
+}
+
+function showRank(){
+  let u=getUser();
+  document.getElementById("content").innerHTML=`
+  <h3>Bảng Xếp Hạng</h3>
+  <div class="rankBox">
+  🥇 ${u.name} - ${u.score} điểm
+  </div>
+  `;
+}
+
+function setAlarm(){
+  let sec=prompt("Nhập số giây:");
+  if(!sec) return;
+
+  setTimeout(()=>{
+    alert("⏰ Báo thức!");
+  },sec*1000);
+}
+
+window.onload=function(){
+  if(getUser()) showMain();
+};
 </script>
 
 </body>
