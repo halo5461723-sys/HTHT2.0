@@ -8,16 +8,20 @@
 body{
     font-family: Arial;
     text-align:center;
-    background: linear-gradient(135deg,#4facfe,#00f2fe);
+    background: linear-gradient(135deg,#667eea,#764ba2);
     color:white;
 }
 .box{
     background:white;
     color:black;
-    width:350px;
+    width:360px;
     margin:20px auto;
     padding:20px;
     border-radius:15px;
+}
+input{
+    width:90%;
+    padding:8px;
 }
 button{
     padding:8px 15px;
@@ -27,8 +31,8 @@ button{
     cursor:pointer;
 }
 .answerBtn{
-    display:block;
     width:100%;
+    margin-top:5px;
 }
 </style>
 </head>
@@ -37,7 +41,9 @@ button{
 
 <h1>HTHT Học Tập Web</h1>
 
-<div class="box" id="loginBox">
+<!-- LOGIN + REGISTER -->
+<div class="box" id="authBox">
+
 <h3>Đăng nhập</h3>
 <input id="loginUser" placeholder="Tên tài khoản"><br><br>
 <input id="loginPass" type="password" placeholder="Mật khẩu"><br><br>
@@ -49,24 +55,20 @@ button{
 <input id="regUser" placeholder="Tên tài khoản"><br><br>
 <input id="regPass" type="password" placeholder="Mật khẩu"><br><br>
 <button onclick="register()">Tạo tài khoản</button>
+
 </div>
 
+<!-- MAIN WEB -->
 <div class="box" id="mainWeb" style="display:none;">
+
 <h3>Chọn lớp</h3>
 <select id="classSelect">
-<option value="1">Lớp 1</option>
-<option value="2">Lớp 2</option>
-<option value="3">Lớp 3</option>
-<option value="4">Lớp 4</option>
-<option value="5">Lớp 5</option>
-<option value="6">Lớp 6</option>
-<option value="7">Lớp 7</option>
-<option value="8">Lớp 8</option>
-<option value="9">Lớp 9</option>
-<option value="10">Lớp 10</option>
-<option value="11">Lớp 11</option>
-<option value="12">Lớp 12</option>
+<option value="1">Lớp 1-4 (Cộng)</option>
+<option value="5">Lớp 5-8 (Nhân)</option>
+<option value="9">Lớp 9-10 (Lũy thừa)</option>
+<option value="11">Lớp 11-12 (Căn)</option>
 </select>
+
 <button onclick="startQuiz()">Làm bài</button>
 
 <h3>Điểm: <span id="score">0</span></h3>
@@ -80,28 +82,29 @@ button{
 
 <script>
 
-// ADMIN AUTO CREATE
+// ===== ADMIN AUTO CREATE =====
 if(!localStorage.getItem("Hthtadmin")){
     localStorage.setItem("Hthtadmin","đkjsksjbdnd");
+    localStorage.setItem("Hthtadmin_score",0);
 }
 
-let currentUser = "";
-let score = 0;
-let answer = null;
-let classLevel = 1;
+let currentUser="";
+let score=0;
+let answer=null;
+let level=1;
 
 // LOGIN
 function login(){
-    let u = loginUser.value;
-    let p = loginPass.value;
-    let saved = localStorage.getItem(u);
+    let u=loginUser.value;
+    let p=loginPass.value;
+    let saved=localStorage.getItem(u);
 
-    if(saved === p){
-        currentUser = u;
-        loginBox.style.display="none";
+    if(saved===p){
+        currentUser=u;
+        score=parseInt(localStorage.getItem(u+"_score"))||0;
+        document.getElementById("score").innerText=score;
+        authBox.style.display="none";
         mainWeb.style.display="block";
-        score = parseInt(localStorage.getItem(u+"_score")) || 0;
-        document.getElementById("score").innerText = score;
     }else{
         alert("Sai tài khoản hoặc mật khẩu!");
     }
@@ -109,13 +112,19 @@ function login(){
 
 // REGISTER
 function register(){
-    let u = regUser.value;
-    let p = regPass.value;
+    let u=regUser.value;
+    let p=regPass.value;
+
+    if(u===""||p===""){
+        alert("Nhập đủ thông tin!");
+        return;
+    }
 
     if(localStorage.getItem(u)){
         alert("Tài khoản đã tồn tại!");
         return;
     }
+
     localStorage.setItem(u,p);
     localStorage.setItem(u+"_score",0);
     alert("Tạo thành công!");
@@ -123,46 +132,48 @@ function register(){
 
 // START QUIZ
 function startQuiz(){
-    classLevel = parseInt(classSelect.value);
+    level=parseInt(classSelect.value);
     quizArea.style.display="block";
     generateQuestion();
+}
+
+// RANDOM
+function rand(min,max){
+    return Math.floor(Math.random()*(max-min+1))+min;
 }
 
 // GENERATE QUESTION
 function generateQuestion(){
 
-    let q = "";
+    let q="";
     let correct;
 
-    if(classLevel <= 4){
-        let a = rand(1,20);
-        let b = rand(1,20);
-        q = a + " + " + b;
-        correct = a + b;
+    if(level<=4){
+        let a=rand(1,20);
+        let b=rand(1,20);
+        q=a+" + "+b;
+        correct=a+b;
     }
-
-    else if(classLevel <= 8){
-        let a = rand(2,12);
-        let b = rand(2,12);
-        q = a + " × " + b;
-        correct = a * b;
+    else if(level<=8){
+        let a=rand(2,12);
+        let b=rand(2,12);
+        q=a+" × "+b;
+        correct=a*b;
     }
-
-    else if(classLevel <= 10){
-        let a = rand(2,5);
-        let b = rand(2,3);
-        q = a + "^" + b;
-        correct = Math.pow(a,b);
+    else if(level<=10){
+        let a=rand(2,5);
+        let b=rand(2,3);
+        q=a+"^"+b;
+        correct=Math.pow(a,b);
     }
-
     else{
-        let a = rand(2,10);
-        q = "√" + (a*a);
-        correct = a;
+        let a=rand(2,10);
+        q="√"+(a*a);
+        correct=a;
     }
 
-    answer = correct;
-    question.innerText = q + " = ?";
+    answer=correct;
+    question.innerText=q+" = ?";
 
     createAnswers(correct);
 }
@@ -170,10 +181,10 @@ function generateQuestion(){
 // CREATE ANSWERS
 function createAnswers(correct){
     answers.innerHTML="";
-    let options = [correct];
+    let options=[correct];
 
     while(options.length<4){
-        let fake = correct + rand(-10,10);
+        let fake=correct+rand(-10,10);
         if(!options.includes(fake)){
             options.push(fake);
         }
@@ -182,7 +193,7 @@ function createAnswers(correct){
     options.sort(()=>Math.random()-0.5);
 
     options.forEach(opt=>{
-        let btn = document.createElement("button");
+        let btn=document.createElement("button");
         btn.className="answerBtn";
         btn.innerText=opt;
         btn.onclick=function(){checkAnswer(opt)};
@@ -190,15 +201,15 @@ function createAnswers(correct){
     });
 }
 
-// CHECK
+// CHECK ANSWER
 function checkAnswer(choice){
 
-    let buttons = document.querySelectorAll(".answerBtn");
+    let buttons=document.querySelectorAll(".answerBtn");
     buttons.forEach(b=>b.disabled=true);
 
-    if(choice === answer){
+    if(choice===answer){
         alert("Đúng!");
-        score += classLevel;
+        score+=level;
         localStorage.setItem(currentUser+"_score",score);
         document.getElementById("score").innerText=score;
     }else{
@@ -210,11 +221,6 @@ function checkAnswer(choice){
     setTimeout(()=>{
         generateQuestion();
     },1000);
-}
-
-// RANDOM
-function rand(min,max){
-    return Math.floor(Math.random()*(max-min+1))+min;
 }
 
 </script>
