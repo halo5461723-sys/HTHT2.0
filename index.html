@@ -2,171 +2,174 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>HTHT Học Tập</title>
+<title>HTHT ULTRA</title>
 
 <style>
 body{
   font-family:Arial;
+  background:linear-gradient(135deg,#d7f0ff,#ffffff);
   margin:0;
-  background:linear-gradient(135deg,#e3f2fd,#ffffff);
   text-align:center;
-}
-
-nav{
-  background:#1976d2;
-  padding:15px;
-  color:white;
-}
-
-nav button{
-  margin:5px;
-  padding:8px 15px;
-  border:none;
-  border-radius:8px;
-  font-weight:bold;
-  cursor:pointer;
 }
 
 .box{
   background:white;
-  width:380px;
+  width:430px;
   margin:20px auto;
   padding:20px;
   border-radius:15px;
-  box-shadow:0 0 10px rgba(0,0,0,0.1);
+  box-shadow:0 0 15px rgba(0,0,0,0.1);
 }
 
-input, select{
-  width:90%;
+input,select,button{
   padding:8px;
   margin:5px;
+  width:90%;
 }
 
-button.answerBtn{
+button{cursor:pointer;}
+
+.answerBtn{
+  display:block;
+  margin:5px auto;
+}
+
+.hidden{display:none;}
+
+.progressBar{
   width:100%;
-  margin-top:5px;
+  background:#ddd;
+  border-radius:20px;
+  height:20px;
 }
 
-img.avatar{
+.progressFill{
+  height:20px;
+  background:#4caf50;
+  border-radius:20px;
+  width:0%;
+}
+
+.avatar{
   width:80px;
   height:80px;
   border-radius:50%;
-  object-fit:cover;
-  background:white;
-}
-
-table{
-  width:90%;
   margin:auto;
-  border-collapse:collapse;
-}
-
-td, th{
-  border:1px solid #ccc;
-  padding:8px;
 }
 </style>
 </head>
 
 <body>
 
-<nav id="menu" style="display:none;">
-  <span id="welcome"></span>
-  <button onclick="showSection('quiz')">Bài tập</button>
-  <button onclick="showSection('profile')">Profile</button>
-  <button onclick="showSection('rank')">Xếp hạng</button>
-  <button onclick="logout()">Đăng xuất</button>
-</nav>
+<h2>HTHT ULTRA</h2>
 
 <div class="box" id="authBox">
   <h3>Đăng ký</h3>
-  <input id="regUser" placeholder="Tên tài khoản">
+  <input id="regUser" placeholder="Tài khoản">
   <input id="regPass" type="password" placeholder="Mật khẩu">
-  <button onclick="register()">Tạo tài khoản</button>
+  <button onclick="register()">Tạo</button>
 
   <hr>
 
   <h3>Đăng nhập</h3>
-  <input id="loginUser" placeholder="Tên tài khoản">
+  <input id="loginUser" placeholder="Tài khoản">
   <input id="loginPass" type="password" placeholder="Mật khẩu">
   <button onclick="login()">Đăng nhập</button>
 </div>
 
-<div id="quiz" style="display:none;">
-  <div class="box">
-    <h3>Làm bài (10 câu/ngày)</h3>
-    <select id="gradeSelect">
+<div class="box hidden" id="mainBox">
+
+  <div id="homeSection">
+    <h3 id="welcome"></h3>
+    <p id="scoreInfo"></p>
+    <p id="levelInfo"></p>
+
+    <div class="progressBar">
+      <div class="progressFill" id="progressFill"></div>
+    </div>
+
+    <br>
+
+    <select id="grade">
       <option value="1">Lớp 1</option>
-      <option value="6">Lớp 6</option>
-      <option value="9">Lớp 9</option>
-      <option value="12">Lớp 12</option>
+      <option value="9">Lớp 9 - Căn bậc hai</option>
     </select>
-    <p id="question"></p>
+
+    <button onclick="newQuestion()">Làm bài</button>
+
+    <h3 id="question"></h3>
     <div id="answers"></div>
-    <p id="limitInfo"></p>
-  </div>
-</div>
 
-<div id="profile" style="display:none;">
-  <div class="box">
-    <h3>Profile</h3>
-    <img id="avatarImg" class="avatar"><br>
-    <input type="file" onchange="uploadAvatar(event)">
-    <p id="info"></p>
-  </div>
-</div>
+    <hr>
 
-<div id="rank" style="display:none;">
-  <div class="box">
+    <button onclick="showProfile()">Profile</button>
+    <button onclick="logout()">Đăng xuất</button>
+
+    <hr>
+
     <h3>Bảng xếp hạng</h3>
-    <table>
-      <thead>
-        <tr>
-          <th>#</th>
-          <th>Avatar</th>
-          <th>Tên</th>
-          <th>Điểm</th>
-        </tr>
-      </thead>
-      <tbody id="rankTable"></tbody>
-    </table>
+    <div id="ranking"></div>
   </div>
+
+  <div id="profileSection" class="hidden">
+
+    <h3>PROFILE</h3>
+    <div class="avatar" id="avatar"></div>
+    <p id="profileName"></p>
+    <p id="profileStats"></p>
+
+    <select id="colorSelect">
+      <option value="red">Đỏ</option>
+      <option value="blue">Xanh dương</option>
+      <option value="green">Xanh lá</option>
+      <option value="purple">Tím</option>
+    </select>
+    <button onclick="changeColor()">Đổi màu avatar</button>
+
+    <hr>
+
+    <input id="newPass" type="password" placeholder="Mật khẩu mới">
+    <button onclick="changePassword()">Đổi mật khẩu</button>
+
+    <hr>
+
+    <h3>Báo thức học</h3>
+    <input type="time" id="alarmTime">
+    <button onclick="setAlarm()">Đặt</button>
+
+    <hr>
+
+    <button onclick="backHome()">Quay lại</button>
+  </div>
+
 </div>
 
 <script>
 let users = JSON.parse(localStorage.getItem("users")) || {};
 let currentUser = localStorage.getItem("currentUser");
+let alarmInterval;
 
 function save(){
   localStorage.setItem("users", JSON.stringify(users));
 }
 
 function register(){
-  let u = regUser.value.trim();
-  let p = regPass.value.trim();
-  if(users[u]) return alert("Tài khoản đã tồn tại");
-  users[u] = {
-    password:p,
-    score:0,
-    correct:0,
-    total:0,
-    today:0,
-    date:new Date().toDateString(),
-    avatar:""
-  };
+  let u=regUser.value.trim();
+  let p=regPass.value.trim();
+  if(!u||!p) return alert("Không để trống");
+  if(users[u]) return alert("Tồn tại");
+  users[u]={password:p,score:0,correct:0,wrong:0,color:"blue"};
   save();
   alert("Tạo thành công");
 }
 
 function login(){
-  let u = loginUser.value.trim();
-  let p = loginPass.value.trim();
-  if(users[u] && users[u].password === p){
+  let u=loginUser.value.trim();
+  let p=loginPass.value.trim();
+  if(users[u] && users[u].password===p){
     localStorage.setItem("currentUser",u);
     location.reload();
-  }else{
-    alert("Sai tài khoản hoặc mật khẩu");
-  }
+  }else alert("Sai tài khoản");
 }
 
 function logout(){
@@ -174,84 +177,132 @@ function logout(){
   location.reload();
 }
 
-function showSection(id){
-  quiz.style.display="none";
-  profile.style.display="none";
-  rank.style.display="none";
-  document.getElementById(id).style.display="block";
-  if(id==="rank") loadRank();
+function loadUser(){
+  if(currentUser && users[currentUser]){
+    authBox.classList.add("hidden");
+    mainBox.classList.remove("hidden");
+    updateUI();
+  }
 }
 
-if(currentUser && users[currentUser]){
-  authBox.style.display="none";
-  menu.style.display="block";
-  welcome.innerText="Xin chào "+currentUser+" | Điểm: "+users[currentUser].score;
-  showSection("quiz");
+function updateUI(){
+  let u=users[currentUser];
+  welcome.innerText="Xin chào "+currentUser;
+  scoreInfo.innerText="Điểm: "+u.score;
+
+  let level=Math.floor(u.score/50)+1;
+  levelInfo.innerText="Level: "+level;
+
+  progressFill.style.width=(u.score%50)*2+"%";
+
+  updateRanking();
 }
 
 function newQuestion(){
-  let grade=parseInt(gradeSelect.value);
-  let a=Math.floor(Math.random()*10)+1;
-  let b=Math.floor(Math.random()*10)+1;
-  let correct=a+b;
-  question.innerText=a+" + "+b+" = ?";
   answers.innerHTML="";
-  for(let i=0;i<4;i++){
+  let correct;
+  let gradeValue=grade.value;
+
+  if(gradeValue==="1"){
+    let a=Math.floor(Math.random()*10)+1;
+    let b=Math.floor(Math.random()*10)+1;
+    correct=a+b;
+    question.innerText=a+" + "+b+" = ?";
+  }
+
+  if(gradeValue==="9"){
+    let n=Math.floor(Math.random()*20)+1;
+    let sq=n*n;
+    correct=n;
+    question.innerText="√"+sq+" = ?";
+  }
+
+  let options=[correct];
+  while(options.length<4){
+    let fake=correct+Math.floor(Math.random()*5)-2;
+    if(fake>0 && !options.includes(fake)) options.push(fake);
+  }
+
+  options.sort(()=>Math.random()-0.5);
+
+  options.forEach(opt=>{
     let btn=document.createElement("button");
     btn.className="answerBtn";
-    let ans=i===0?correct:correct+Math.floor(Math.random()*5)+1;
-    btn.innerText=ans;
-    btn.onclick=function(){check(ans,correct,grade)};
+    btn.innerText=opt;
+    btn.onclick=function(){
+      if(opt===correct){
+        users[currentUser].score+= (gradeValue==="9"?9:1);
+        users[currentUser].correct++;
+        alert("Đúng!");
+      }else{
+        users[currentUser].wrong++;
+        alert("Sai!");
+      }
+      save();
+      updateUI();
+      newQuestion();
+    };
     answers.appendChild(btn);
-  }
-}
-
-function check(ans,correct,grade){
-  let user=users[currentUser];
-  if(user.date!==new Date().toDateString()){
-    user.today=0;
-    user.date=new Date().toDateString();
-  }
-  if(user.today>=10){
-    return alert("Hết lượt hôm nay");
-  }
-  user.today++;
-  user.total++;
-  if(ans===correct){
-    user.score+=grade;
-    user.correct++;
-  }
-  save();
-  newQuestion();
-}
-
-function loadRank(){
-  let arr=Object.keys(users).map(u=>({name:u,score:users[u].score,avatar:users[u].avatar}));
-  arr.sort((a,b)=>b.score-a.score);
-  rankTable.innerHTML="";
-  arr.forEach((u,i)=>{
-    rankTable.innerHTML+=`
-    <tr>
-      <td>${i+1}</td>
-      <td><img src="${u.avatar||''}" class="avatar"></td>
-      <td>${u.name}</td>
-      <td>${u.score}</td>
-    </tr>`;
   });
 }
 
-function uploadAvatar(e){
-  let reader=new FileReader();
-  reader.onload=function(){
-    users[currentUser].avatar=reader.result;
-    save();
-    avatarImg.src=reader.result;
-  }
-  reader.readAsDataURL(e.target.files[0]);
+function updateRanking(){
+  let arr=Object.entries(users);
+  arr.sort((a,b)=>b[1].score-a[1].score);
+  ranking.innerHTML="";
+  arr.forEach((u,i)=>{
+    ranking.innerHTML+= (i+1)+". "+u[0]+" - "+u[1].score+" điểm<br>";
+  });
 }
 
-gradeSelect.onchange=newQuestion;
-newQuestion();
+function showProfile(){
+  homeSection.classList.add("hidden");
+  profileSection.classList.remove("hidden");
+
+  let u=users[currentUser];
+  avatar.style.background=u.color;
+  profileName.innerText="Tên: "+currentUser;
+  profileStats.innerText="Đúng: "+u.correct+" | Sai: "+u.wrong;
+}
+
+function backHome(){
+  profileSection.classList.add("hidden");
+  homeSection.classList.remove("hidden");
+}
+
+function changeColor(){
+  users[currentUser].color=colorSelect.value;
+  save();
+  avatar.style.background=colorSelect.value;
+}
+
+function changePassword(){
+  let np=newPass.value.trim();
+  if(!np) return alert("Nhập mật khẩu mới");
+  users[currentUser].password=np;
+  save();
+  alert("Đổi thành công");
+}
+
+function setAlarm(){
+  let time=alarmTime.value;
+  if(!time) return alert("Chọn giờ");
+
+  if(alarmInterval) clearInterval(alarmInterval);
+
+  alarmInterval=setInterval(()=>{
+    let now=new Date();
+    let h=String(now.getHours()).padStart(2,'0');
+    let m=String(now.getMinutes()).padStart(2,'0');
+    if(time===h+":"+m){
+      alert("Đến giờ học rồi!");
+    }
+  },1000);
+
+  alert("Đặt thành công");
+}
+
+loadUser();
 </script>
 
 </body>
