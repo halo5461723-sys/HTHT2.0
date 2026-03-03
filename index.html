@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Báo Thức Thông Minh</title>
+<title>Báo Thức Vũ Trụ</title>
 
 <style>
 body {
@@ -13,20 +13,30 @@ body {
   justify-content: center;
   align-items: center;
   flex-direction: column;
-
-  /* Nền vũ trụ */
-  background-image: url('https://images.unsplash.com/photo-1462331940025-496dfbfc7564');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
   color: white;
+
+  /* Nền gradient vũ trụ chắc chắn hiện */
+  background: linear-gradient(135deg, #000428, #004e92);
 }
 
 .container {
-  background: rgba(0,0,0,0.6);
+  background: rgba(0, 0, 0, 0.6);
   padding: 30px;
   border-radius: 20px;
   text-align: center;
+  box-shadow: 0 0 30px rgba(0,0,0,0.8);
+}
+
+h1 {
+  margin-bottom: 20px;
+}
+
+input {
+  padding: 10px;
+  border-radius: 10px;
+  border: none;
+  margin: 5px;
+  font-size: 14px;
 }
 
 button {
@@ -36,18 +46,13 @@ button {
   font-size: 16px;
   cursor: pointer;
   margin-top: 10px;
-}
-
-#addBtn {
   background: #00c3ff;
   color: white;
+  transition: 0.3s;
 }
 
-input {
-  padding: 8px;
-  border-radius: 8px;
-  border: none;
-  margin: 5px;
+button:hover {
+  background: #0099cc;
 }
 </style>
 </head>
@@ -55,12 +60,12 @@ input {
 <body>
 
 <div class="container">
-  <h1>Báo Thức</h1>
-  
-  <input type="time" id="timeInput">
-  <input type="text" id="nameInput" placeholder="Tên báo thức">
-  <br>
-  <button id="addBtn">+ Báo Thức</button>
+  <h1>⏰ Báo Thức</h1>
+
+  <input type="time" id="timeInput"><br>
+  <input type="text" id="nameInput" placeholder="Tên báo thức"><br>
+
+  <button onclick="setAlarm()">+ Báo Thức</button>
 
   <h3 id="status"></h3>
 </div>
@@ -69,7 +74,7 @@ input {
 let alarmTime = "";
 let alarmName = "";
 
-document.getElementById("addBtn").onclick = function() {
+function setAlarm() {
   alarmTime = document.getElementById("timeInput").value;
   alarmName = document.getElementById("nameInput").value;
 
@@ -78,14 +83,14 @@ document.getElementById("addBtn").onclick = function() {
     return;
   }
 
-  document.getElementById("status").innerHTML = 
+  document.getElementById("status").innerHTML =
     "Đã đặt: " + alarmTime + " - " + alarmName;
-};
+}
 
 setInterval(function() {
   let now = new Date();
-  let currentTime = 
-    now.getHours().toString().padStart(2,'0') + ":" + 
+  let currentTime =
+    now.getHours().toString().padStart(2,'0') + ":" +
     now.getMinutes().toString().padStart(2,'0');
 
   if(currentTime === alarmTime) {
