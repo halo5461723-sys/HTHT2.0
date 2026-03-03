@@ -2,20 +2,20 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>HTHT ULTRA</title>
+<title>HTHT FULL PROFILE</title>
 
 <style>
 body{
   font-family:Arial;
   background:linear-gradient(135deg,#d7f0ff,#ffffff);
-  margin:0;
   text-align:center;
+  margin:0;
 }
 
 .box{
   background:white;
   width:430px;
-  margin:20px auto;
+  margin:25px auto;
   padding:20px;
   border-radius:15px;
   box-shadow:0 0 15px rgba(0,0,0,0.1);
@@ -28,46 +28,19 @@ input,select,button{
 }
 
 button{cursor:pointer;}
-
-.answerBtn{
-  display:block;
-  margin:5px auto;
-}
-
 .hidden{display:none;}
-
-.progressBar{
-  width:100%;
-  background:#ddd;
-  border-radius:20px;
-  height:20px;
-}
-
-.progressFill{
-  height:20px;
-  background:#4caf50;
-  border-radius:20px;
-  width:0%;
-}
-
-.avatar{
-  width:80px;
-  height:80px;
-  border-radius:50%;
-  margin:auto;
-}
 </style>
 </head>
 
 <body>
 
-<h2>HTHT ULTRA</h2>
+<h2>HTHT PROFILE 34 TỈNH</h2>
 
 <div class="box" id="authBox">
   <h3>Đăng ký</h3>
   <input id="regUser" placeholder="Tài khoản">
   <input id="regPass" type="password" placeholder="Mật khẩu">
-  <button onclick="register()">Tạo</button>
+  <button onclick="register()">Tạo tài khoản</button>
 
   <hr>
 
@@ -79,67 +52,61 @@ button{cursor:pointer;}
 
 <div class="box hidden" id="mainBox">
 
-  <div id="homeSection">
-    <h3 id="welcome"></h3>
-    <p id="scoreInfo"></p>
-    <p id="levelInfo"></p>
+  <h3 id="welcome"></h3>
 
-    <div class="progressBar">
-      <div class="progressFill" id="progressFill"></div>
-    </div>
+  <button onclick="toggleProfile()">Mở / Đóng Profile</button>
+  <button onclick="logout()">Đăng xuất</button>
 
-    <br>
+  <div id="profileBox" class="hidden">
 
-    <select id="grade">
-      <option value="1">Lớp 1</option>
-      <option value="9">Lớp 9 - Căn bậc hai</option>
+    <h3>Hồ sơ cá nhân</h3>
+
+    <input id="displayName" placeholder="Tên hiển thị">
+
+    <select id="province">
+      <option value="">-- Chọn tỉnh --</option>
+      <option>Hà Nội</option>
+      <option>TP Hồ Chí Minh</option>
+      <option>Hải Phòng</option>
+      <option>Đà Nẵng</option>
+      <option>Cần Thơ</option>
+      <option>An Giang</option>
+      <option>Bà Rịa - Vũng Tàu</option>
+      <option>Bắc Giang</option>
+      <option>Bắc Ninh</option>
+      <option>Bến Tre</option>
+      <option>Bình Dương</option>
+      <option>Bình Phước</option>
+      <option>Bình Thuận</option>
+      <option>Cà Mau</option>
+      <option>Cao Bằng</option>
+      <option>Đắk Lắk</option>
+      <option>Đồng Nai</option>
+      <option>Đồng Tháp</option>
+      <option>Gia Lai</option>
+      <option>Hà Tĩnh</option>
+      <option>Hưng Yên</option>
+      <option>Khánh Hòa</option>
+      <option>Kiên Giang</option>
+      <option>Lâm Đồng</option>
+      <option>Lạng Sơn</option>
+      <option>Lào Cai</option>
+      <option>Long An</option>
+      <option>Nam Định</option>
+      <option>Nghệ An</option>
+      <option>Ninh Bình</option>
+      <option>Phú Thọ</option>
+      <option>Quảng Ninh</option>
+      <option>Sóc Trăng</option>
+      <option>Tây Ninh</option>
     </select>
 
-    <button onclick="newQuestion()">Làm bài</button>
-
-    <h3 id="question"></h3>
-    <div id="answers"></div>
+    <button onclick="saveProfile()">Lưu profile</button>
 
     <hr>
 
-    <button onclick="showProfile()">Profile</button>
-    <button onclick="logout()">Đăng xuất</button>
+    <p id="profileInfo"></p>
 
-    <hr>
-
-    <h3>Bảng xếp hạng</h3>
-    <div id="ranking"></div>
-  </div>
-
-  <div id="profileSection" class="hidden">
-
-    <h3>PROFILE</h3>
-    <div class="avatar" id="avatar"></div>
-    <p id="profileName"></p>
-    <p id="profileStats"></p>
-
-    <select id="colorSelect">
-      <option value="red">Đỏ</option>
-      <option value="blue">Xanh dương</option>
-      <option value="green">Xanh lá</option>
-      <option value="purple">Tím</option>
-    </select>
-    <button onclick="changeColor()">Đổi màu avatar</button>
-
-    <hr>
-
-    <input id="newPass" type="password" placeholder="Mật khẩu mới">
-    <button onclick="changePassword()">Đổi mật khẩu</button>
-
-    <hr>
-
-    <h3>Báo thức học</h3>
-    <input type="time" id="alarmTime">
-    <button onclick="setAlarm()">Đặt</button>
-
-    <hr>
-
-    <button onclick="backHome()">Quay lại</button>
   </div>
 
 </div>
@@ -147,159 +114,96 @@ button{cursor:pointer;}
 <script>
 let users = JSON.parse(localStorage.getItem("users")) || {};
 let currentUser = localStorage.getItem("currentUser");
-let alarmInterval;
 
 function save(){
   localStorage.setItem("users", JSON.stringify(users));
 }
 
 function register(){
-  let u=regUser.value.trim();
-  let p=regPass.value.trim();
-  if(!u||!p) return alert("Không để trống");
-  if(users[u]) return alert("Tồn tại");
-  users[u]={password:p,score:0,correct:0,wrong:0,color:"blue"};
+  let u = regUser.value.trim();
+  let p = regPass.value.trim();
+
+  if(!u || !p){
+    alert("Không để trống");
+    return;
+  }
+
+  if(users[u]){
+    alert("Tài khoản đã tồn tại");
+    return;
+  }
+
+  users[u] = {
+    password:p,
+    displayName:"",
+    province:""
+  };
+
   save();
-  alert("Tạo thành công");
+  alert("Tạo thành công! Giờ đăng nhập.");
 }
 
 function login(){
-  let u=loginUser.value.trim();
-  let p=loginPass.value.trim();
-  if(users[u] && users[u].password===p){
-    localStorage.setItem("currentUser",u);
-    location.reload();
-  }else alert("Sai tài khoản");
+  let u = loginUser.value.trim();
+  let p = loginPass.value.trim();
+
+  if(!users[u]){
+    alert("Không tồn tại tài khoản");
+    return;
+  }
+
+  if(users[u].password !== p){
+    alert("Sai mật khẩu");
+    return;
+  }
+
+  currentUser = u;
+  localStorage.setItem("currentUser", u);
+  loadUser();
 }
 
 function logout(){
   localStorage.removeItem("currentUser");
-  location.reload();
+  currentUser=null;
+  authBox.classList.remove("hidden");
+  mainBox.classList.add("hidden");
 }
 
 function loadUser(){
+  currentUser = localStorage.getItem("currentUser");
+
   if(currentUser && users[currentUser]){
     authBox.classList.add("hidden");
     mainBox.classList.remove("hidden");
-    updateUI();
+    welcome.innerText="Xin chào " + currentUser;
+    showProfileInfo();
   }
 }
 
-function updateUI(){
-  let u=users[currentUser];
-  welcome.innerText="Xin chào "+currentUser;
-  scoreInfo.innerText="Điểm: "+u.score;
+function toggleProfile(){
+  profileBox.classList.toggle("hidden");
 
-  let level=Math.floor(u.score/50)+1;
-  levelInfo.innerText="Level: "+level;
-
-  progressFill.style.width=(u.score%50)*2+"%";
-
-  updateRanking();
-}
-
-function newQuestion(){
-  answers.innerHTML="";
-  let correct;
-  let gradeValue=grade.value;
-
-  if(gradeValue==="1"){
-    let a=Math.floor(Math.random()*10)+1;
-    let b=Math.floor(Math.random()*10)+1;
-    correct=a+b;
-    question.innerText=a+" + "+b+" = ?";
+  if(!profileBox.classList.contains("hidden")){
+    let u = users[currentUser];
+    displayName.value = u.displayName;
+    province.value = u.province;
+    showProfileInfo();
   }
-
-  if(gradeValue==="9"){
-    let n=Math.floor(Math.random()*20)+1;
-    let sq=n*n;
-    correct=n;
-    question.innerText="√"+sq+" = ?";
-  }
-
-  let options=[correct];
-  while(options.length<4){
-    let fake=correct+Math.floor(Math.random()*5)-2;
-    if(fake>0 && !options.includes(fake)) options.push(fake);
-  }
-
-  options.sort(()=>Math.random()-0.5);
-
-  options.forEach(opt=>{
-    let btn=document.createElement("button");
-    btn.className="answerBtn";
-    btn.innerText=opt;
-    btn.onclick=function(){
-      if(opt===correct){
-        users[currentUser].score+= (gradeValue==="9"?9:1);
-        users[currentUser].correct++;
-        alert("Đúng!");
-      }else{
-        users[currentUser].wrong++;
-        alert("Sai!");
-      }
-      save();
-      updateUI();
-      newQuestion();
-    };
-    answers.appendChild(btn);
-  });
 }
 
-function updateRanking(){
-  let arr=Object.entries(users);
-  arr.sort((a,b)=>b[1].score-a[1].score);
-  ranking.innerHTML="";
-  arr.forEach((u,i)=>{
-    ranking.innerHTML+= (i+1)+". "+u[0]+" - "+u[1].score+" điểm<br>";
-  });
-}
-
-function showProfile(){
-  homeSection.classList.add("hidden");
-  profileSection.classList.remove("hidden");
-
-  let u=users[currentUser];
-  avatar.style.background=u.color;
-  profileName.innerText="Tên: "+currentUser;
-  profileStats.innerText="Đúng: "+u.correct+" | Sai: "+u.wrong;
-}
-
-function backHome(){
-  profileSection.classList.add("hidden");
-  homeSection.classList.remove("hidden");
-}
-
-function changeColor(){
-  users[currentUser].color=colorSelect.value;
+function saveProfile(){
+  users[currentUser].displayName = displayName.value.trim();
+  users[currentUser].province = province.value;
   save();
-  avatar.style.background=colorSelect.value;
+  showProfileInfo();
+  alert("Lưu thành công");
 }
 
-function changePassword(){
-  let np=newPass.value.trim();
-  if(!np) return alert("Nhập mật khẩu mới");
-  users[currentUser].password=np;
-  save();
-  alert("Đổi thành công");
-}
-
-function setAlarm(){
-  let time=alarmTime.value;
-  if(!time) return alert("Chọn giờ");
-
-  if(alarmInterval) clearInterval(alarmInterval);
-
-  alarmInterval=setInterval(()=>{
-    let now=new Date();
-    let h=String(now.getHours()).padStart(2,'0');
-    let m=String(now.getMinutes()).padStart(2,'0');
-    if(time===h+":"+m){
-      alert("Đến giờ học rồi!");
-    }
-  },1000);
-
-  alert("Đặt thành công");
+function showProfileInfo(){
+  let u = users[currentUser];
+  profileInfo.innerText =
+    "Tên hiển thị: " + (u.displayName || "Chưa đặt") +
+    " | Tỉnh: " + (u.province || "Chưa chọn");
 }
 
 loadUser();
