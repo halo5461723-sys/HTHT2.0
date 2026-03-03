@@ -2,211 +2,157 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Mini App Nhàn</title>
+<title>HTHT Web</title>
 <style>
 body{
-  font-family:Arial;
-  background:#f4f6ff;
-  text-align:center;
-  padding:20px;
+    font-family: Arial;
+    text-align:center;
+    background:linear-gradient(135deg,#4facfe,#00f2fe);
+    margin:0;
 }
 .box{
-  background:white;
-  padding:20px;
-  border-radius:12px;
-  box-shadow:0 4px 10px rgba(0,0,0,0.1);
-  margin:auto;
-  max-width:400px;
+    background:white;
+    margin:20px auto;
+    padding:20px;
+    width:90%;
+    max-width:500px;
+    border-radius:15px;
+    box-shadow:0 5px 15px rgba(0,0,0,0.2);
 }
 button{
-  padding:8px 14px;
-  border:none;
-  border-radius:8px;
-  background:#4e73ff;
-  color:white;
-  margin:5px;
+    padding:8px 15px;
+    border:none;
+    border-radius:10px;
+    cursor:pointer;
+    background:#4facfe;
+    color:white;
 }
 input{
-  padding:6px;
-  margin:5px;
+    padding:8px;
+    border-radius:8px;
+    border:1px solid #ccc;
+}
+.rank{
+    border:2px solid gold;
+    border-radius:10px;
+    margin:5px;
+    padding:5px;
 }
 img{
-  width:90px;
-  height:90px;
-  border-radius:50%;
-  object-fit:cover;
-  margin:10px;
-}
-.hidden{display:none;}
-
-.rankBox{
-  border:2px solid #4e73ff;
-  border-radius:10px;
-  padding:10px;
-  margin-top:10px;
-  text-align:left;
-}
-
-.progress{
-  width:100%;
-  background:#ddd;
-  border-radius:10px;
-  height:20px;
-  margin:10px 0;
-}
-.progress-bar{
-  height:100%;
-  width:0%;
-  background:#4e73ff;
-  border-radius:10px;
+    width:80px;
+    height:80px;
+    border-radius:50%;
+    object-fit:cover;
 }
 </style>
 </head>
-
 <body>
 
 <div class="box" id="setupBox">
-<h2>Đặt tên của bạn</h2>
+<h2>Nhập tên của bạn</h2>
 <input id="nameInput" placeholder="Tên của bạn">
-<input type="file" id="avatarInput">
-<br>
-<button onclick="startApp()">Bắt đầu</button>
+<br><br>
+<button onclick="saveName()">Bắt đầu</button>
 </div>
 
-<div class="box hidden" id="mainBox">
-<h2 id="welcome"></h2>
-<img id="avatarImg">
-<br>
-<button onclick="changeAvatar()">Đổi Avatar</button>
-<button onclick="showProfile()">Profile</button>
-<button onclick="showMath()">Làm toán</button>
-<button onclick="showRank()">BXH</button>
+<div class="box" id="mainBox" style="display:none;">
+<h2 id="hello"></h2>
+
+<img id="avatar" src="https://i.imgur.com/6VBx3io.png">
+<br><br>
+<input type="file" onchange="changeAvatar(event)">
+<br><br>
+
+<p>Điểm: <span id="score">0</span></p>
+<p>Tiến trình: <span id="progress">0%</span></p>
+
+<button onclick="startQuiz()">Làm bài</button>
 <button onclick="setAlarm()">Báo thức</button>
 
-<div id="content"></div>
+<h3>Bảng xếp hạng</h3>
+<div id="ranking"></div>
 </div>
 
 <script>
-function getUser(){
-  return JSON.parse(localStorage.getItem("user")||"null");
-}
+let user = JSON.parse(localStorage.getItem("htht_user"));
 
-function saveUser(u){
-  localStorage.setItem("user",JSON.stringify(u));
-}
-
-function startApp(){
-  let name=document.getElementById("nameInput").value.trim();
-  if(!name){alert("Nhập tên!");return;}
-
-  let file=document.getElementById("avatarInput").files[0];
-  let reader=new FileReader();
-
-  reader.onload=function(e){
-    let user={
-      name:name,
-      avatar:e.target.result||"",
-      score:0,
-      exp:0
-    };
-    saveUser(user);
+if(user){
     showMain();
-  };
+}
 
-  if(file) reader.readAsDataURL(file);
-  else reader.onload({target:{result:""}});
+function saveName(){
+    let name = document.getElementById("nameInput").value.trim();
+    if(!name) return alert("Nhập tên đi");
+    user = {
+        name:name,
+        score:0,
+        progress:0,
+        avatar:"https://i.imgur.com/6VBx3io.png"
+    };
+    localStorage.setItem("htht_user",JSON.stringify(user));
+    showMain();
 }
 
 function showMain(){
-  let u=getUser();
-  document.getElementById("setupBox").classList.add("hidden");
-  document.getElementById("mainBox").classList.remove("hidden");
-  document.getElementById("welcome").innerText="Xin chào "+u.name;
-  document.getElementById("avatarImg").src=u.avatar||"https://via.placeholder.com/90";
+    document.getElementById("setupBox").style.display="none";
+    document.getElementById("mainBox").style.display="block";
+    document.getElementById("hello").innerText="Xin chào "+user.name;
+    document.getElementById("score").innerText=user.score;
+    document.getElementById("progress").innerText=user.progress+"%";
+    document.getElementById("avatar").src=user.avatar;
+    updateRanking();
 }
 
-function changeAvatar(){
-  let input=document.createElement("input");
-  input.type="file";
-  input.onchange=function(){
-    let file=input.files[0];
-    let reader=new FileReader();
-    reader.onload=function(e){
-      let u=getUser();
-      u.avatar=e.target.result;
-      saveUser(u);
-      showMain();
-    };
+function startQuiz(){
+    let a = Math.floor(Math.random()*20)+1;
+    let b = Math.floor(Math.random()*20)+1;
+    let answer = prompt("Tính: "+a+" + "+b);
+    if(answer == a+b){
+        user.score+=10;
+        user.progress+=10;
+        alert("Đúng!");
+    }else{
+        alert("Sai rồi!");
+    }
+    localStorage.setItem("htht_user",JSON.stringify(user));
+    showMain();
+}
+
+function changeAvatar(event){
+    let file = event.target.files[0];
+    let reader = new FileReader();
+    reader.onload=function(){
+        user.avatar = reader.result;
+        localStorage.setItem("htht_user",JSON.stringify(user));
+        document.getElementById("avatar").src=user.avatar;
+    }
     reader.readAsDataURL(file);
-  };
-  input.click();
 }
 
-function showProfile(){
-  let u=getUser();
-  let percent=Math.min((u.exp%100),100);
-
-  document.getElementById("content").innerHTML=`
-  <h3>Profile</h3>
-  <p>Tên: ${u.name}</p>
-  <p>Điểm: ${u.score}</p>
-  <div class="progress">
-    <div class="progress-bar" style="width:${percent}%"></div>
-  </div>
-  <p>EXP: ${u.exp}/100</p>
-  `;
-}
-
-let currentAnswer=0;
-
-function showMath(){
-  let n=Math.floor(Math.random()*100)+1;
-  currentAnswer=Math.sqrt(n).toFixed(2);
-
-  document.getElementById("content").innerHTML=`
-  <h3>√${n} = ? (2 số thập phân)</h3>
-  <input id="ans">
-  <button onclick="checkAns()">Nộp</button>
-  `;
-}
-
-function checkAns(){
-  let ans=parseFloat(document.getElementById("ans").value).toFixed(2);
-  let u=getUser();
-
-  if(ans==currentAnswer){
-    alert("Đúng!");
-    u.score+=10;
-    u.exp+=20;
-  }else{
-    alert("Sai! Đáp án "+currentAnswer);
-  }
-
-  saveUser(u);
-}
-
-function showRank(){
-  let u=getUser();
-  document.getElementById("content").innerHTML=`
-  <h3>Bảng Xếp Hạng</h3>
-  <div class="rankBox">
-  🥇 ${u.name} - ${u.score} điểm
-  </div>
-  `;
+function updateRanking(){
+    let list = JSON.parse(localStorage.getItem("htht_ranking")) || [];
+    let found = list.find(u=>u.name===user.name);
+    if(!found){
+        list.push(user);
+    }else{
+        found.score=user.score;
+    }
+    list.sort((a,b)=>b.score-a.score);
+    localStorage.setItem("htht_ranking",JSON.stringify(list));
+    let html="";
+    list.forEach((u,i)=>{
+        html+=`<div class="rank">${i+1}. ${u.name} - ${u.score} điểm</div>`;
+    });
+    document.getElementById("ranking").innerHTML=html;
 }
 
 function setAlarm(){
-  let sec=prompt("Nhập số giây:");
-  if(!sec) return;
-
-  setTimeout(()=>{
-    alert("⏰ Báo thức!");
-  },sec*1000);
+    let sec = prompt("Nhập số giây:");
+    if(!sec) return;
+    setTimeout(()=>{
+        alert("⏰ Báo thức!");
+    },sec*1000);
 }
-
-window.onload=function(){
-  if(getUser()) showMain();
-};
 </script>
 
 </body>
