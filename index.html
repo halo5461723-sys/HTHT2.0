@@ -2,172 +2,166 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>HTHT Web</title>
+<title>HTHT Account</title>
 <style>
-body{font-family:Arial;background:#eef2ff;text-align:center}
-.box{background:white;width:380px;margin:20px auto;padding:15px;border-radius:10px;box-shadow:0 0 8px #ccc}
-input,button{width:90%;padding:7px;margin:5px}
-.hidden{display:none}
+body{
+  font-family: Arial;
+  background:#eef2ff;
+  text-align:center;
+  margin:0;
+}
+.container{
+  background:white;
+  width:90%;
+  max-width:400px;
+  margin:40px auto;
+  padding:20px;
+  border-radius:12px;
+  box-shadow:0 0 10px #ccc;
+}
+input,button{
+  width:95%;
+  padding:10px;
+  margin:6px 0;
+  border-radius:6px;
+  border:1px solid #ccc;
+}
+button{
+  background:#4f46e5;
+  color:white;
+  border:none;
+}
+button:hover{
+  opacity:0.9;
+}
+.hidden{
+  display:none;
+}
+.small{
+  font-size:13px;
+  color:gray;
+}
 </style>
 </head>
 <body>
 
-<!-- AUTH -->
-<div class="box" id="authBox">
-<h3>Đăng ký</h3>
-<input id="regEmail" type="email" placeholder="Email">
-<input id="regPass" type="password" placeholder="Mật khẩu">
-<input id="regName" placeholder="Tên hiển thị">
+<div class="container" id="authBox">
+
+<h3>Đăng Ký</h3>
+<input type="email" id="regEmail" placeholder="Email">
+<input type="password" id="regPass" placeholder="Mật khẩu">
+<input type="text" id="regName" placeholder="Tên hiển thị">
 <button onclick="register()">Tạo tài khoản</button>
+
 <hr>
-<h3>Đăng nhập</h3>
-<input id="loginEmail" type="email" placeholder="Email">
-<input id="loginPass" type="password" placeholder="Mật khẩu">
+
+<h3>Đăng Nhập</h3>
+<input type="email" id="loginEmail" placeholder="Email">
+<input type="password" id="loginPass" placeholder="Mật khẩu">
 <button onclick="login()">Đăng nhập</button>
+
+<p class="small">Dữ liệu lưu trên máy này</p>
+
 </div>
 
-<!-- MAIN -->
-<div class="box hidden" id="mainBox">
+<div class="container hidden" id="mainBox">
 <h2 id="welcome"></h2>
-
-<button onclick="showProfile()">Profile</button>
-<button onclick="showMath()">Làm bài Toán</button>
-<button onclick="showRank()">Xếp hạng</button>
-<button onclick="showAlarm()">Báo thức</button>
+<p>Email: <span id="showEmail"></span></p>
 <button onclick="logout()">Đăng xuất</button>
-
-<div id="content"></div>
 </div>
 
 <script>
 
-// ===== USERS =====
+// Lấy users
 function getUsers(){
-  return JSON.parse(localStorage.getItem("users")||"{}");
-}
-function saveUsers(u){
-  localStorage.setItem("users",JSON.stringify(u));
+  return JSON.parse(localStorage.getItem("users") || "{}");
 }
 
-// ===== REGISTER =====
+// Lưu users
+function saveUsers(users){
+  localStorage.setItem("users", JSON.stringify(users));
+}
+
+// Đăng ký
 function register(){
-  let email=regEmail.value.trim().toLowerCase();
-  let pass=regPass.value;
-  let name=regName.value.trim();
-  if(!email||!pass||!name){alert("Điền đủ");return;}
-  let u=getUsers();
-  if(u[email]){alert("Email tồn tại");return;}
-  for(let k in u){if(u[k].name===name){alert("Tên trùng");return;}}
-  u[email]={password:pass,name:name,score:0,progress:0};
-  saveUsers(u);
-  alert("Tạo thành công");
+  let email = document.getElementById("regEmail").value.trim().toLowerCase();
+  let pass = document.getElementById("regPass").value;
+  let name = document.getElementById("regName").value.trim();
+
+  if(!email || !pass || !name){
+    alert("Không được để trống");
+    return;
+  }
+
+  let users = getUsers();
+
+  if(users[email]){
+    alert("Email đã tồn tại");
+    return;
+  }
+
+  for(let e in users){
+    if(users[e].name === name){
+      alert("Tên hiển thị đã tồn tại");
+      return;
+    }
+  }
+
+  users[email] = {
+    password: pass,
+    name: name
+  };
+
+  saveUsers(users);
+  alert("Tạo tài khoản thành công!");
 }
 
-// ===== LOGIN =====
+// Đăng nhập
 function login(){
-  let email=loginEmail.value.trim().toLowerCase();
-  let pass=loginPass.value;
-  let u=getUsers();
-  if(!u[email]){alert("Không tồn tại");return;}
-  if(u[email].password!==pass){alert("Sai mật khẩu");return;}
-  localStorage.setItem("currentUser",email);
+  let email = document.getElementById("loginEmail").value.trim().toLowerCase();
+  let pass = document.getElementById("loginPass").value;
+
+  let users = getUsers();
+
+  if(!users[email]){
+    alert("Email không tồn tại");
+    return;
+  }
+
+  if(users[email].password !== pass){
+    alert("Sai mật khẩu");
+    return;
+  }
+
+  localStorage.setItem("currentUser", email);
   showMain(email);
 }
 
-// ===== SHOW MAIN =====
+// Hiển thị sau login
 function showMain(email){
-  let u=getUsers();
-  authBox.classList.add("hidden");
-  mainBox.classList.remove("hidden");
-  welcome.innerText="Xin chào "+u[email].name;
+  let users = getUsers();
+
+  document.getElementById("authBox").classList.add("hidden");
+  document.getElementById("mainBox").classList.remove("hidden");
+
+  document.getElementById("welcome").innerText =
+    "Xin chào " + users[email].name;
+
+  document.getElementById("showEmail").innerText = email;
 }
 
-// ===== PROFILE =====
-function showProfile(){
-  let email=localStorage.getItem("currentUser");
-  let u=getUsers();
-  content.innerHTML=`
-  <h3>Profile</h3>
-  <p>Email: ${email}</p>
-  <p>Tên: ${u[email].name}</p>
-  <p>Điểm: ${u[email].score}</p>
-  <p>Tiến trình: ${u[email].progress}%</p>
-  `;
-}
-
-// ===== MATH =====
-let currentAnswer=0;
-function showMath(){
-  let a=Math.floor(Math.random()*50)+1;
-  currentAnswer=Math.sqrt(a).toFixed(2);
-  content.innerHTML=`
-  <h3>Tính căn bậc 2</h3>
-  <p>√${a} = ? (làm tròn 2 số)</p>
-  <input id="mathAns">
-  <button onclick="checkMath()">Nộp</button>
-  `;
-}
-function checkMath(){
-  let ans=parseFloat(mathAns.value).toFixed(2);
-  let email=localStorage.getItem("currentUser");
-  let u=getUsers();
-  if(ans==currentAnswer){
-    alert("Đúng!");
-    u[email].score+=10;
-    u[email].progress+=10;
-  }else{
-    alert("Sai! Đáp án "+currentAnswer);
-  }
-  saveUsers(u);
-}
-
-// ===== RANK =====
-function showRank(){
-  let u=getUsers();
-  let arr=[];
-  for(let k in u){
-    arr.push({name:u[k].name,score:u[k].score});
-  }
-  arr.sort((a,b)=>b.score-a.score);
-  let html="<h3>Xếp hạng</h3>";
-  arr.forEach((x,i)=>{
-    html+=`<p>${i+1}. ${x.name} - ${x.score} điểm</p>`;
-  });
-  content.innerHTML=html;
-}
-
-// ===== ALARM =====
-function showAlarm(){
-  content.innerHTML=`
-  <h3>Báo thức</h3>
-  <input type="time" id="alarmTime">
-  <button onclick="setAlarm()">Đặt</button>
-  `;
-}
-function setAlarm(){
-  let time=alarmTime.value;
-  alert("Đã đặt lúc "+time);
-  let check=setInterval(()=>{
-    let now=new Date();
-    let h=String(now.getHours()).padStart(2,'0');
-    let m=String(now.getMinutes()).padStart(2,'0');
-    if(time===h+":"+m){
-      alert("ĐẾN GIỜ HỌC!");
-      clearInterval(check);
-    }
-  },1000);
-}
-
-// ===== LOGOUT =====
+// Đăng xuất
 function logout(){
   localStorage.removeItem("currentUser");
   location.reload();
 }
 
-// ===== AUTO LOGIN =====
-window.onload=function(){
-  let email=localStorage.getItem("currentUser");
-  if(email){showMain(email);}
+// Tự login nếu còn phiên
+window.onload = function(){
+  let email = localStorage.getItem("currentUser");
+  if(email){
+    showMain(email);
+  }
 };
 
 </script>
