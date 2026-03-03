@@ -20,7 +20,7 @@ body{
   background:#0008;
   padding:25px;
   border-radius:15px;
-  width:340px;
+  width:350px;
   text-align:center;
 }
 
@@ -32,18 +32,11 @@ input,button,select{
   border-radius:8px;
 }
 
-button{
-  background:#00c3ff;
-  color:white;
-  cursor:pointer;
-}
+button{background:#00c3ff;color:white;cursor:pointer;}
+button:hover{background:#0099cc;}
 
-button:hover{
-  background:#0099cc;
-}
-
-#clock{margin:8px 0;}
 .hidden{display:none;}
+#clock{margin:8px 0;}
 </style>
 </head>
 
@@ -64,19 +57,21 @@ button:hover{
 <!-- MAIN -->
 <div id="mainArea" class="hidden">
 
-  <h3 id="hello"></h3>
-  <p>⭐ Tổng điểm: <span id="score">0</span></p>
+<h3 id="hello"></h3>
+<p>⭐ Tổng điểm: <span id="score">0</span></p>
 
-  <!-- ĐỒNG HỒ -->
-  <div id="clock"></div>
-  <input type="time" id="alarm">
-  <button onclick="setAlarm()">Đặt báo thức</button>
+<!-- Đồng hồ -->
+<div id="clock"></div>
+<input type="time" id="alarm">
+<button onclick="setAlarm()">Đặt báo thức</button>
 
-  <hr>
+<hr>
 
-  <!-- BÀI TẬP -->
-  <h3>Làm bài tập</h3>
-  <select id="grade">
+<!-- Bài tập -->
+<button onclick="startExercise()">Làm bài tập lấy điểm</button>
+
+<div id="exerciseArea" class="hidden">
+  <select id="gradeSelect">
     <option value="1">Lớp 1</option>
     <option value="2">Lớp 2</option>
     <option value="3">Lớp 3</option>
@@ -91,24 +86,29 @@ button:hover{
     <option value="12">Lớp 12</option>
   </select>
 
-  <button onclick="generateQuestion()">Ra bài</button>
+  <button onclick="generateQuestion()">Ra câu hỏi</button>
 
   <p id="question"></p>
-  <input id="answer" placeholder="Nhập đáp án">
-  <button onclick="checkAnswer()">Nộp bài</button>
-
+  <div id="choices"></div>
   <p id="result"></p>
-
-  <button onclick="logout()">Đăng xuất</button>
-
+  <p id="remaining"></p>
 </div>
 
+<button onclick="logout()">Đăng xuất</button>
+
+</div>
 </div>
 
 <script>
 let alarmTime=null;
 let correctAnswer=0;
 let totalScore=0;
+let questionCount=0;
+
+/* Load dữ liệu */
+if(localStorage.score){
+  totalScore=parseInt(localStorage.score);
+}
 
 /* ĐĂNG KÝ */
 function save(){
@@ -125,20 +125,16 @@ function login(){
      loginArea.classList.add("hidden");
      mainArea.classList.remove("hidden");
      hello.innerHTML="Xin chào, "+user.value+" 👋";
+     score.innerHTML=totalScore;
+     checkDailyLimit();
   }else{
      alert("Sai tài khoản!");
   }
 }
 
-function logout(){
-  location.reload();
-}
+function logout(){location.reload();}
 
-/* BÁO THỨC */
-function setAlarm(){
-  alarmTime=alarm.value;
-}
-
+/* Đồng hồ */
 setInterval(()=>{
   let now=new Date();
   clock.innerHTML="Bây giờ: "+now.toLocaleTimeString();
@@ -152,31 +148,74 @@ setInterval(()=>{
   }
 },1000);
 
-/* BÀI TẬP */
+function setAlarm(){alarmTime=alarm.value;}
+
+/* Bài tập */
+function startExercise(){
+  exerciseArea.classList.remove("hidden");
+}
+
+/* Giới hạn 10 câu mỗi 24h */
+function checkDailyLimit(){
+  let today=new Date().toDateString();
+
+  if(localStorage.lastDate!==today){
+     localStorage.lastDate=today;
+     localStorage.dailyCount=0;
+  }
+
+  questionCount=parseInt(localStorage.dailyCount||0);
+  remaining.innerHTML="Còn lại: "+(10-questionCount)+" câu hôm nay";
+}
+
 function generateQuestion(){
-  let grade=parseInt(grade.value);
+
+  if(questionCount>=10){
+    alert("Hôm nay đã làm đủ 10 câu!");
+    return;
+  }
+
+  let grade=parseInt(gradeSelect.value);
 
   let a=Math.floor(Math.random()*grade*5)+1;
   let b=Math.floor(Math.random()*grade*5)+1;
 
   correctAnswer=a+b;
+
   question.innerHTML="Tính: "+a+" + "+b+" = ?";
-  result.innerHTML="";
+
+  let options=[
+    correctAnswer,
+    correctAnswer+Math.floor(Math.random()*5)+1,
+    correctAnswer-Math.floor(Math.random()*5)-1,
+    correctAnswer+2
+  ];
+
+  options.sort(()=>Math.random()-0.5);
+
+  choices.innerHTML="";
+  options.forEach(opt=>{
+    let btn=document.createElement("button");
+    btn.innerText=opt;
+    btn.onclick=function(){checkAnswer(opt,grade);}
+    choices.appendChild(btn);
+  });
 }
 
-function checkAnswer(){
-  let grade=parseInt(document.getElementById("grade").value);
-  let userAnswer=parseInt(answer.value);
+function checkAnswer(answer,grade){
 
-  if(userAnswer===correctAnswer){
+  if(answer===correctAnswer){
     totalScore+=grade;
     score.innerHTML=totalScore;
-    result.innerHTML="✅ Đúng! +" + grade + " điểm";
+    localStorage.score=totalScore;
+    result.innerHTML="✅ Đúng! +"+grade+" điểm";
   }else{
-    result.innerHTML="❌ Sai rồi!";
+    result.innerHTML="❌ Sai!";
   }
 
-  answer.value="";
+  questionCount++;
+  localStorage.dailyCount=questionCount;
+  remaining.innerHTML="Còn lại: "+(10-questionCount)+" câu hôm nay";
 }
 </script>
 
