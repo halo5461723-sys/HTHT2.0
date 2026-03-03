@@ -2,192 +2,190 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>HTHT Pro</title>
+<title>HTHT Math</title>
 <style>
 body{
-    font-family:Arial;
-    text-align:center;
-    background:linear-gradient(135deg,#667eea,#764ba2);
-    margin:0;
-    color:white;
+  font-family: Arial;
+  background: linear-gradient(135deg,#4e73df,#1cc88a);
+  text-align:center;
+  margin:0;
+  color:white;
 }
-.box{
-    background:white;
-    color:black;
-    margin:20px auto;
-    padding:20px;
-    width:90%;
-    max-width:500px;
-    border-radius:20px;
-    box-shadow:0 10px 25px rgba(0,0,0,0.3);
+.card{
+  background:white;
+  color:black;
+  margin:20px auto;
+  padding:20px;
+  border-radius:15px;
+  width:90%;
+  max-width:400px;
+  box-shadow:0 5px 20px rgba(0,0,0,0.3);
 }
 button{
-    padding:8px 15px;
-    border:none;
-    border-radius:10px;
-    cursor:pointer;
-    background:#667eea;
-    color:white;
+  padding:10px 20px;
+  border:none;
+  border-radius:10px;
+  background:#4e73df;
+  color:white;
+  font-weight:bold;
+  margin:5px;
 }
-.rank{
-    border:2px solid gold;
-    border-radius:12px;
-    margin:5px;
-    padding:8px;
+select,input{
+  padding:8px;
+  border-radius:8px;
+  margin:5px;
 }
-.progressCircle{
-    width:120px;
-    height:120px;
-    border-radius:50%;
-    background:conic-gradient(#667eea 0%, #ddd 0%);
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    margin:auto;
-    font-weight:bold;
+#avatarPreview{
+  width:80px;
+  height:80px;
+  border-radius:50%;
+  object-fit:cover;
+  border:3px solid #4e73df;
 }
-img{
-    width:80px;
-    height:80px;
-    border-radius:50%;
-    object-fit:cover;
+#progressBar{
+  width:100%;
+  height:15px;
+  background:#ddd;
+  border-radius:10px;
+  overflow:hidden;
+}
+#progressFill{
+  height:100%;
+  width:0%;
+  background:#1cc88a;
+}
+.rankItem{
+  background:#f8f9fc;
+  padding:10px;
+  margin:5px 0;
+  border-radius:10px;
+  border:2px solid #4e73df;
 }
 </style>
 </head>
 <body>
 
-<div class="box" id="setupBox">
-<h2>Nhập tên của bạn</h2>
-<input id="nameInput">
-<br><br>
-<button onclick="saveName()">Bắt đầu</button>
+<h2>HTHT Math</h2>
+
+<div class="card" id="profileCard">
+  <h3>Hồ sơ</h3>
+  <img id="avatarPreview">
+  <br>
+  <input type="text" id="nameInput" placeholder="Nhập tên">
+  <br>
+  <input type="text" id="avatarInput" placeholder="Link ảnh avatar">
+  <br>
+  <button onclick="saveProfile()">Lưu</button>
+  <p id="scoreText"></p>
+  <div id="progressBar"><div id="progressFill"></div></div>
 </div>
 
-<div class="box" id="mainBox" style="display:none;">
-<h2 id="hello"></h2>
+<div class="card">
+  <h3>Chọn lớp</h3>
+  <select id="gradeSelect">
+    <option value="1">Lớp 1</option>
+    <option value="2">Lớp 2</option>
+    <option value="3">Lớp 3</option>
+    <option value="4">Lớp 4</option>
+    <option value="5">Lớp 5</option>
+    <option value="6">Lớp 6</option>
+    <option value="7">Lớp 7</option>
+    <option value="8">Lớp 8</option>
+    <option value="9">Lớp 9</option>
+    <option value="10">Lớp 10</option>
+    <option value="11">Lớp 11</option>
+    <option value="12">Lớp 12</option>
+  </select>
+  <br>
+  <button onclick="startGame()">Bắt đầu</button>
+  <h2 id="question"></h2>
+  <input type="number" id="answer">
+  <br>
+  <button onclick="checkAnswer()">Trả lời</button>
+</div>
 
-<img id="avatar" src="https://i.imgur.com/6VBx3io.png">
-<br><br>
-<input type="file" onchange="changeAvatar(event)">
-<br><br>
-
-<p>Điểm: <span id="score">0</span></p>
-<p>Tiến trình: <span id="progress">0%</span></p>
-
-<h3>Chọn lớp</h3>
-<select id="gradeSelect">
-<option value="1">Lớp 1</option>
-<option value="2">Lớp 2</option>
-<option value="3">Lớp 3</option>
-<option value="4">Lớp 4</option>
-<option value="5">Lớp 5</option>
-<option value="6">Lớp 6</option>
-<option value="7">Lớp 7</option>
-<option value="8">Lớp 8</option>
-<option value="9">Lớp 9</option>
-<option value="10">Lớp 10</option>
-<option value="11">Lớp 11</option>
-<option value="12">Lớp 12</option>
-</select>
-<br><br>
-<button onclick="startQuiz()">Làm bài</button>
-
-<hr>
-
-<h3>⏰ Đặt báo thức</h3>
-<input id="alarmName" placeholder="Tên báo thức">
-<br><br>
-<input type="range" min="5" max="300" value="10" id="alarmRange" oninput="updateCircle()">
-<div class="progressCircle" id="circle">10s</div>
-<br>
-<button onclick="setAlarm()">Đặt báo thức</button>
-
-<hr>
-
-<h3>Bảng xếp hạng</h3>
-<div id="ranking"></div>
-
+<div class="card">
+  <h3>Bảng xếp hạng (máy này)</h3>
+  <div id="ranking"></div>
 </div>
 
 <script>
-let user = JSON.parse(localStorage.getItem("htht_user"));
+const KEY="HTHT_FIXED_USER_5973_V10";
 
-if(user){ showMain(); }
-
-function saveName(){
-    let name = nameInput.value.trim();
-    if(!name) return alert("Nhập tên đi");
-    user={name:name,score:0,progress:0,avatar:"https://i.imgur.com/6VBx3io.png"};
-    localStorage.setItem("htht_user",JSON.stringify(user));
-    showMain();
+function getUser(){
+  let data=localStorage.getItem(KEY);
+  return data?JSON.parse(data):null;
 }
 
-function showMain(){
-    setupBox.style.display="none";
-    mainBox.style.display="block";
-    hello.innerText="Xin chào "+user.name;
-    score.innerText=user.score;
-    progress.innerText=user.progress+"%";
-    avatar.src=user.avatar;
-    updateRanking();
+function saveUser(u){
+  localStorage.setItem(KEY,JSON.stringify(u));
 }
 
-function startQuiz(){
-    let grade=parseInt(gradeSelect.value);
-    let max=grade*10;
-    let a=Math.floor(Math.random()*max)+1;
-    let b=Math.floor(Math.random()*max)+1;
-    let ans=prompt("Lớp "+grade+": "+a+" + "+b+" = ?");
-    if(ans==a+b){
-        user.score+=grade;
-        user.progress+=grade;
-        alert("Đúng +"+grade+" điểm");
-    }else alert("Sai!");
-    localStorage.setItem("htht_user",JSON.stringify(user));
-    showMain();
+let user=getUser();
+
+if(!user){
+  user={
+    name:"",
+    avatar:"",
+    score:0
+  };
+  saveUser(user);
 }
 
-function changeAvatar(e){
-    let file=e.target.files[0];
-    let reader=new FileReader();
-    reader.onload=function(){
-        user.avatar=reader.result;
-        localStorage.setItem("htht_user",JSON.stringify(user));
-        avatar.src=user.avatar;
-    }
-    reader.readAsDataURL(file);
+function loadProfile(){
+  document.getElementById("nameInput").value=user.name;
+  document.getElementById("avatarInput").value=user.avatar;
+  document.getElementById("avatarPreview").src=user.avatar||"https://i.imgur.com/1X5XQ9G.png";
+  document.getElementById("scoreText").innerText="Điểm: "+user.score;
+  updateProgress();
+}
+
+function saveProfile(){
+  user.name=document.getElementById("nameInput").value;
+  user.avatar=document.getElementById("avatarInput").value;
+  saveUser(user);
+  loadProfile();
+}
+
+function updateProgress(){
+  let percent=(user.score%100);
+  document.getElementById("progressFill").style.width=percent+"%";
+}
+
+let correctAnswer=0;
+
+function startGame(){
+  let grade=parseInt(document.getElementById("gradeSelect").value);
+  let a=Math.floor(Math.random()*grade)+1;
+  let b=Math.floor(Math.random()*grade)+1;
+  correctAnswer=a+b;
+  document.getElementById("question").innerText=a+" + "+b+" = ?";
+}
+
+function checkAnswer(){
+  let ans=parseInt(document.getElementById("answer").value);
+  if(ans===correctAnswer){
+    user.score+=10;
+    saveUser(user);
+    alert("Đúng!");
+  }else{
+    alert("Sai!");
+  }
+  loadProfile();
+  updateRanking();
 }
 
 function updateRanking(){
-    let list=JSON.parse(localStorage.getItem("htht_rank"))||[];
-    let f=list.find(u=>u.name===user.name);
-    if(!f) list.push(user);
-    else f.score=user.score;
-    list.sort((a,b)=>b.score-a.score);
-    localStorage.setItem("htht_rank",JSON.stringify(list));
-    ranking.innerHTML="";
-    list.forEach((u,i)=>{
-        ranking.innerHTML+=`<div class="rank">${i+1}. ${u.name} - ${u.score} điểm</div>`;
-    });
+  let rankDiv=document.getElementById("ranking");
+  rankDiv.innerHTML="";
+  let item=document.createElement("div");
+  item.className="rankItem";
+  item.innerText=user.name+" - "+user.score+" điểm";
+  rankDiv.appendChild(item);
 }
 
-function updateCircle(){
-    let val=alarmRange.value;
-    let percent=(val/300)*100;
-    circle.style.background=`conic-gradient(#667eea ${percent}%, #ddd ${percent}%)`;
-    circle.innerText=val+"s";
-}
-
-function setAlarm(){
-    let sec=alarmRange.value;
-    let name=alarmName.value||"Báo thức";
-    alert("Đã đặt "+name+" sau "+sec+" giây");
-    setTimeout(()=>{
-        alert("⏰ "+name+" kêu rồi!");
-    },sec*1000);
-}
-
-updateCircle();
+loadProfile();
+updateRanking();
 </script>
 
 </body>
