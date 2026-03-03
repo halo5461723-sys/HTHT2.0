@@ -2,236 +2,215 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>HTHT - Web Học Tập</title>
-
+<title>HTHT Web Học Tập</title>
 <style>
-body{
-    font-family: Arial;
-    background:#f2f6ff;
-    margin:0;
-    text-align:center;
-}
-header{
-    background:#2563eb;
-    color:white;
-    padding:15px;
-}
-button{
-    padding:8px 15px;
-    margin:5px;
-    border:none;
-    border-radius:6px;
-    background:#2563eb;
-    color:white;
-    cursor:pointer;
-}
-input{
-    padding:8px;
-    margin:5px;
-}
-.card{
-    background:white;
-    width:300px;
-    margin:20px auto;
-    padding:20px;
-    border-radius:10px;
-    box-shadow:0 0 10px rgba(0,0,0,0.1);
-}
-.hidden{ display:none; }
-.rank1{ color:gold; font-weight:bold; }
-.rank2{ color:silver; font-weight:bold; }
-.rank3{ color:#cd7f32; font-weight:bold; }
+body{font-family:Arial;background:#eef6ff;text-align:center;}
+.box{background:white;width:380px;margin:20px auto;padding:15px;border-radius:10px;box-shadow:0 0 10px #ccc;}
+input,select,button{padding:7px;margin:5px;width:90%;}
+.hidden{display:none;}
+#leaderboard li{list-style:none;}
 </style>
 </head>
-
 <body>
 
-<header>
-<h2>HTHT - Web Học Tập</h2>
-</header>
+<!-- LOGIN / REGISTER -->
+<div class="box" id="authBox">
+<h3>Đăng ký</h3>
+<input id="regUser" placeholder="Tài khoản">
+<input id="regPass" type="password" placeholder="Mật khẩu">
+<select id="regProvince">
+<option value="">--Chọn tỉnh--</option>
+<option>An Giang</option>
+<option>Bà Rịa - Vũng Tàu</option>
+<option>Bạc Liêu</option>
+<option>Bắc Giang</option>
+<option>Bắc Kạn</option>
+<option>Bắc Ninh</option>
+<option>Bến Tre</option>
+<option>Bình Dương</option>
+<option>Bình Định</option>
+<option>Bình Phước</option>
+<option>Bình Thuận</option>
+<option>Cà Mau</option>
+<option>Cần Thơ</option>
+<option>Cao Bằng</option>
+<option>Đà Nẵng</option>
+<option>Đắk Lắk</option>
+<option>Đắk Nông</option>
+<option>Điện Biên</option>
+<option>Đồng Nai</option>
+<option>Đồng Tháp</option>
+<option>Gia Lai</option>
+<option>Hà Giang</option>
+<option>Hà Nam</option>
+<option>Hà Nội</option>
+<option>Hà Tĩnh</option>
+<option>Hải Dương</option>
+<option>Hải Phòng</option>
+<option>Hậu Giang</option>
+<option>Hòa Bình</option>
+<option>Hưng Yên</option>
+<option>Khánh Hòa</option>
+<option>Kiên Giang</option>
+<option>Kon Tum</option>
+<option>Lai Châu</option>
+</select>
+<button onclick="register()">Tạo tài khoản</button>
 
-<!-- LOGIN -->
-<div id="loginBox" class="card">
+<hr>
+
 <h3>Đăng nhập</h3>
-<input id="loginUser" placeholder="Tài khoản"><br>
-<input id="loginPass" type="password" placeholder="Mật khẩu"><br>
+<input id="loginUser" placeholder="Tài khoản">
+<input id="loginPass" type="password" placeholder="Mật khẩu">
 <button onclick="login()">Đăng nhập</button>
-<button onclick="showRegister()">Tạo tài khoản</button>
-</div>
-
-<!-- REGISTER -->
-<div id="registerBox" class="card hidden">
-<h3>Tạo tài khoản</h3>
-<input id="regUser" placeholder="Tài khoản"><br>
-<input id="regPass" type="password" placeholder="Mật khẩu"><br>
-<button onclick="register()">Tạo</button>
-<button onclick="backLogin()">Quay lại</button>
 </div>
 
 <!-- MAIN -->
-<div id="mainBox" class="hidden">
+<div class="box hidden" id="mainBox">
+<h3 id="welcome"></h3>
+<p id="profileInfo"></p>
 
-<div class="card">
-<h3>👤 Profile</h3>
-<p id="profileName"></p>
-<p id="profileScore"></p>
-<button onclick="logout()">Đăng xuất</button>
-</div>
+<hr>
 
-<div class="card">
-<h3>📘 Bài Toán</h3>
+<h4>Bài Toán</h4>
 <p id="question"></p>
 <input id="answer" placeholder="Đáp án">
 <button onclick="checkAnswer()">Làm bài</button>
-<p id="result"></p>
-</div>
 
-<div class="card">
-<h3>🏆 Xếp Hạng</h3>
-<div id="ranking"></div>
-</div>
+<p>XP: <span id="xp">0</span></p>
 
-<div class="card">
-<h3>⏰ Báo Thức Học</h3>
+<hr>
+
+<h4>Xếp hạng</h4>
+<ul id="leaderboard"></ul>
+
+<hr>
+
+<h4>Báo thức</h4>
 <input type="time" id="alarmTime">
-<button onclick="setAlarm()">Đặt</button>
-<p id="alarmStatus"></p>
-</div>
+<button onclick="setAlarm()">Đặt báo thức</button>
 
+<hr>
+
+<button onclick="logout()">Đăng xuất</button>
 </div>
 
 <script>
 
-let currentUser = null;
-let correctAnswer = 0;
+function getUsers(){
+  return JSON.parse(localStorage.getItem("users") || "{}");
+}
 
-// ===== ĐĂNG KÝ =====
+function saveUsers(u){
+  localStorage.setItem("users",JSON.stringify(u));
+}
+
 function register(){
-    let user = regUser.value;
-    let pass = regPass.value;
+  let u=document.getElementById("regUser").value.trim();
+  let p=document.getElementById("regPass").value;
+  let province=document.getElementById("regProvince").value;
 
-    if(!user || !pass){
-        alert("Nhập đủ thông tin");
-        return;
-    }
+  if(!u||!p||!province){alert("Nhập đủ thông tin");return;}
 
-    let users = JSON.parse(localStorage.getItem("users")) || {};
+  let users=getUsers();
+  if(users[u]){alert("Tài khoản tồn tại");return;}
 
-    if(users[user]){
-        alert("Tài khoản đã tồn tại");
-        return;
-    }
-
-    users[user] = {password:pass, score:0};
-    localStorage.setItem("users", JSON.stringify(users));
-    alert("Tạo thành công!");
-    backLogin();
+  users[u]={password:p,xp:0,province:province};
+  saveUsers(users);
+  alert("Tạo thành công!");
 }
 
-// ===== ĐĂNG NHẬP =====
 function login(){
-    let user = loginUser.value;
-    let pass = loginPass.value;
+  let u=document.getElementById("loginUser").value.trim();
+  let p=document.getElementById("loginPass").value;
 
-    let users = JSON.parse(localStorage.getItem("users")) || {};
+  let users=getUsers();
+  if(!users[u]){alert("Không tồn tại");return;}
+  if(users[u].password!==p){alert("Sai mật khẩu");return;}
 
-    if(users[user] && users[user].password === pass){
-        currentUser = user;
-        loginBox.classList.add("hidden");
-        mainBox.classList.remove("hidden");
-        loadProfile();
-        generateQuestion();
-        updateRanking();
-    }else{
-        alert("Sai tài khoản hoặc mật khẩu");
-    }
+  localStorage.setItem("currentUser",u);
+  showMain();
 }
 
-// ===== PROFILE =====
-function loadProfile(){
-    let users = JSON.parse(localStorage.getItem("users"));
-    profileName.innerText = "Tên: " + currentUser;
-    profileScore.innerText = "Điểm: " + users[currentUser].score;
+function showMain(){
+  let u=localStorage.getItem("currentUser");
+  let users=getUsers();
+
+  document.getElementById("authBox").classList.add("hidden");
+  document.getElementById("mainBox").classList.remove("hidden");
+
+  document.getElementById("welcome").innerText="Xin chào "+u;
+  document.getElementById("profileInfo").innerText="Tỉnh: "+users[u].province;
+  document.getElementById("xp").innerText=users[u].xp;
+
+  generateQuestion();
+  updateLeaderboard();
 }
 
-// ===== LOGOUT =====
 function logout(){
-    location.reload();
+  localStorage.removeItem("currentUser");
+  location.reload();
 }
 
-// ===== BÀI TOÁN CĂN BẬC 2 =====
+let correctAnswer=0;
+
 function generateQuestion(){
-    let num = Math.floor(Math.random()*100)+1;
-    correctAnswer = Math.sqrt(num).toFixed(2);
-    question.innerText = "√" + num + " = ?";
+  let n=Math.floor(Math.random()*20)+1;
+  correctAnswer=Math.sqrt(n*n);
+  document.getElementById("question").innerText="√"+(n*n)+" = ?";
 }
 
 function checkAnswer(){
-    let ans = answer.value;
-    if(ans == correctAnswer){
-        result.innerText = "Đúng +10 điểm!";
-        let users = JSON.parse(localStorage.getItem("users"));
-        users[currentUser].score += 10;
-        localStorage.setItem("users", JSON.stringify(users));
-        loadProfile();
-        updateRanking();
-        generateQuestion();
-    }else{
-        result.innerText = "Sai!";
-    }
-    answer.value="";
+  let ans=parseInt(document.getElementById("answer").value);
+  let u=localStorage.getItem("currentUser");
+  let users=getUsers();
+
+  if(ans===correctAnswer){
+    users[u].xp+=10;
+    alert("Đúng +10 XP");
+  }else{
+    alert("Sai rồi");
+  }
+
+  saveUsers(users);
+  document.getElementById("xp").innerText=users[u].xp;
+  generateQuestion();
+  updateLeaderboard();
 }
 
-// ===== XẾP HẠNG =====
-function updateRanking(){
-    let users = JSON.parse(localStorage.getItem("users"));
-    let arr = Object.entries(users);
-    arr.sort((a,b)=>b[1].score - a[1].score);
+function updateLeaderboard(){
+  let users=getUsers();
+  let arr=Object.keys(users).map(k=>({name:k,xp:users[k].xp}));
+  arr.sort((a,b)=>b.xp-a.xp);
 
-    ranking.innerHTML="";
-    arr.forEach((u,i)=>{
-        let cls="";
-        if(i==0) cls="rank1";
-        if(i==1) cls="rank2";
-        if(i==2) cls="rank3";
-
-        ranking.innerHTML += 
-        `<p class="${cls}">${i+1}. ${u[0]} - ${u[1].score} điểm</p>`;
-    });
+  let lb=document.getElementById("leaderboard");
+  lb.innerHTML="";
+  arr.slice(0,5).forEach(u=>{
+    let li=document.createElement("li");
+    li.innerText=u.name+" - "+u.xp+" XP";
+    lb.appendChild(li);
+  });
 }
 
-// ===== BÁO THỨC =====
 function setAlarm(){
-    let time = alarmTime.value;
-    if(!time){
-        alert("Chọn giờ");
-        return;
+  let time=document.getElementById("alarmTime").value;
+  if(!time){alert("Chọn giờ");return;}
+  alert("Đã đặt báo thức "+time);
+  setInterval(()=>{
+    let now=new Date();
+    let current=now.getHours().toString().padStart(2,'0')+":"+now.getMinutes().toString().padStart(2,'0');
+    if(current===time){
+      alert("⏰ Tới giờ học rồi!");
     }
-
-    alarmStatus.innerText="Đã đặt báo thức " + time;
-
-    setInterval(()=>{
-        let now = new Date();
-        let current = now.getHours().toString().padStart(2,'0') + ":" +
-                      now.getMinutes().toString().padStart(2,'0');
-
-        if(current === time){
-            alert("⏰ Tới giờ học rồi!");
-        }
-    },1000);
+  },1000);
 }
 
-// ===== CHUYỂN BOX =====
-function showRegister(){
-    loginBox.classList.add("hidden");
-    registerBox.classList.remove("hidden");
-}
-function backLogin(){
-    registerBox.classList.add("hidden");
-    loginBox.classList.remove("hidden");
-}
+window.onload=function(){
+  if(localStorage.getItem("currentUser")){
+    showMain();
+  }
+};
 
 </script>
-
 </body>
 </html>
