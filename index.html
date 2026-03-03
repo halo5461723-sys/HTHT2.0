@@ -2,215 +2,175 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>HTHT Web Học Tập</title>
+<title>HTHT Web</title>
 <style>
-body{font-family:Arial;background:#eef6ff;text-align:center;}
-.box{background:white;width:380px;margin:20px auto;padding:15px;border-radius:10px;box-shadow:0 0 10px #ccc;}
-input,select,button{padding:7px;margin:5px;width:90%;}
-.hidden{display:none;}
-#leaderboard li{list-style:none;}
+body{font-family:Arial;background:#eef2ff;text-align:center}
+.box{background:white;width:380px;margin:20px auto;padding:15px;border-radius:10px;box-shadow:0 0 8px #ccc}
+input,button{width:90%;padding:7px;margin:5px}
+.hidden{display:none}
 </style>
 </head>
 <body>
 
-<!-- LOGIN / REGISTER -->
+<!-- AUTH -->
 <div class="box" id="authBox">
 <h3>Đăng ký</h3>
-<input id="regUser" placeholder="Tài khoản">
+<input id="regEmail" type="email" placeholder="Email">
 <input id="regPass" type="password" placeholder="Mật khẩu">
-<select id="regProvince">
-<option value="">--Chọn tỉnh--</option>
-<option>An Giang</option>
-<option>Bà Rịa - Vũng Tàu</option>
-<option>Bạc Liêu</option>
-<option>Bắc Giang</option>
-<option>Bắc Kạn</option>
-<option>Bắc Ninh</option>
-<option>Bến Tre</option>
-<option>Bình Dương</option>
-<option>Bình Định</option>
-<option>Bình Phước</option>
-<option>Bình Thuận</option>
-<option>Cà Mau</option>
-<option>Cần Thơ</option>
-<option>Cao Bằng</option>
-<option>Đà Nẵng</option>
-<option>Đắk Lắk</option>
-<option>Đắk Nông</option>
-<option>Điện Biên</option>
-<option>Đồng Nai</option>
-<option>Đồng Tháp</option>
-<option>Gia Lai</option>
-<option>Hà Giang</option>
-<option>Hà Nam</option>
-<option>Hà Nội</option>
-<option>Hà Tĩnh</option>
-<option>Hải Dương</option>
-<option>Hải Phòng</option>
-<option>Hậu Giang</option>
-<option>Hòa Bình</option>
-<option>Hưng Yên</option>
-<option>Khánh Hòa</option>
-<option>Kiên Giang</option>
-<option>Kon Tum</option>
-<option>Lai Châu</option>
-</select>
+<input id="regName" placeholder="Tên hiển thị">
 <button onclick="register()">Tạo tài khoản</button>
-
 <hr>
-
 <h3>Đăng nhập</h3>
-<input id="loginUser" placeholder="Tài khoản">
+<input id="loginEmail" type="email" placeholder="Email">
 <input id="loginPass" type="password" placeholder="Mật khẩu">
 <button onclick="login()">Đăng nhập</button>
 </div>
 
 <!-- MAIN -->
 <div class="box hidden" id="mainBox">
-<h3 id="welcome"></h3>
-<p id="profileInfo"></p>
+<h2 id="welcome"></h2>
 
-<hr>
-
-<h4>Bài Toán</h4>
-<p id="question"></p>
-<input id="answer" placeholder="Đáp án">
-<button onclick="checkAnswer()">Làm bài</button>
-
-<p>XP: <span id="xp">0</span></p>
-
-<hr>
-
-<h4>Xếp hạng</h4>
-<ul id="leaderboard"></ul>
-
-<hr>
-
-<h4>Báo thức</h4>
-<input type="time" id="alarmTime">
-<button onclick="setAlarm()">Đặt báo thức</button>
-
-<hr>
-
+<button onclick="showProfile()">Profile</button>
+<button onclick="showMath()">Làm bài Toán</button>
+<button onclick="showRank()">Xếp hạng</button>
+<button onclick="showAlarm()">Báo thức</button>
 <button onclick="logout()">Đăng xuất</button>
+
+<div id="content"></div>
 </div>
 
 <script>
 
+// ===== USERS =====
 function getUsers(){
-  return JSON.parse(localStorage.getItem("users") || "{}");
+  return JSON.parse(localStorage.getItem("users")||"{}");
 }
-
 function saveUsers(u){
   localStorage.setItem("users",JSON.stringify(u));
 }
 
+// ===== REGISTER =====
 function register(){
-  let u=document.getElementById("regUser").value.trim();
-  let p=document.getElementById("regPass").value;
-  let province=document.getElementById("regProvince").value;
-
-  if(!u||!p||!province){alert("Nhập đủ thông tin");return;}
-
-  let users=getUsers();
-  if(users[u]){alert("Tài khoản tồn tại");return;}
-
-  users[u]={password:p,xp:0,province:province};
-  saveUsers(users);
-  alert("Tạo thành công!");
+  let email=regEmail.value.trim().toLowerCase();
+  let pass=regPass.value;
+  let name=regName.value.trim();
+  if(!email||!pass||!name){alert("Điền đủ");return;}
+  let u=getUsers();
+  if(u[email]){alert("Email tồn tại");return;}
+  for(let k in u){if(u[k].name===name){alert("Tên trùng");return;}}
+  u[email]={password:pass,name:name,score:0,progress:0};
+  saveUsers(u);
+  alert("Tạo thành công");
 }
 
+// ===== LOGIN =====
 function login(){
-  let u=document.getElementById("loginUser").value.trim();
-  let p=document.getElementById("loginPass").value;
-
-  let users=getUsers();
-  if(!users[u]){alert("Không tồn tại");return;}
-  if(users[u].password!==p){alert("Sai mật khẩu");return;}
-
-  localStorage.setItem("currentUser",u);
-  showMain();
+  let email=loginEmail.value.trim().toLowerCase();
+  let pass=loginPass.value;
+  let u=getUsers();
+  if(!u[email]){alert("Không tồn tại");return;}
+  if(u[email].password!==pass){alert("Sai mật khẩu");return;}
+  localStorage.setItem("currentUser",email);
+  showMain(email);
 }
 
-function showMain(){
-  let u=localStorage.getItem("currentUser");
-  let users=getUsers();
-
-  document.getElementById("authBox").classList.add("hidden");
-  document.getElementById("mainBox").classList.remove("hidden");
-
-  document.getElementById("welcome").innerText="Xin chào "+u;
-  document.getElementById("profileInfo").innerText="Tỉnh: "+users[u].province;
-  document.getElementById("xp").innerText=users[u].xp;
-
-  generateQuestion();
-  updateLeaderboard();
+// ===== SHOW MAIN =====
+function showMain(email){
+  let u=getUsers();
+  authBox.classList.add("hidden");
+  mainBox.classList.remove("hidden");
+  welcome.innerText="Xin chào "+u[email].name;
 }
 
+// ===== PROFILE =====
+function showProfile(){
+  let email=localStorage.getItem("currentUser");
+  let u=getUsers();
+  content.innerHTML=`
+  <h3>Profile</h3>
+  <p>Email: ${email}</p>
+  <p>Tên: ${u[email].name}</p>
+  <p>Điểm: ${u[email].score}</p>
+  <p>Tiến trình: ${u[email].progress}%</p>
+  `;
+}
+
+// ===== MATH =====
+let currentAnswer=0;
+function showMath(){
+  let a=Math.floor(Math.random()*50)+1;
+  currentAnswer=Math.sqrt(a).toFixed(2);
+  content.innerHTML=`
+  <h3>Tính căn bậc 2</h3>
+  <p>√${a} = ? (làm tròn 2 số)</p>
+  <input id="mathAns">
+  <button onclick="checkMath()">Nộp</button>
+  `;
+}
+function checkMath(){
+  let ans=parseFloat(mathAns.value).toFixed(2);
+  let email=localStorage.getItem("currentUser");
+  let u=getUsers();
+  if(ans==currentAnswer){
+    alert("Đúng!");
+    u[email].score+=10;
+    u[email].progress+=10;
+  }else{
+    alert("Sai! Đáp án "+currentAnswer);
+  }
+  saveUsers(u);
+}
+
+// ===== RANK =====
+function showRank(){
+  let u=getUsers();
+  let arr=[];
+  for(let k in u){
+    arr.push({name:u[k].name,score:u[k].score});
+  }
+  arr.sort((a,b)=>b.score-a.score);
+  let html="<h3>Xếp hạng</h3>";
+  arr.forEach((x,i)=>{
+    html+=`<p>${i+1}. ${x.name} - ${x.score} điểm</p>`;
+  });
+  content.innerHTML=html;
+}
+
+// ===== ALARM =====
+function showAlarm(){
+  content.innerHTML=`
+  <h3>Báo thức</h3>
+  <input type="time" id="alarmTime">
+  <button onclick="setAlarm()">Đặt</button>
+  `;
+}
+function setAlarm(){
+  let time=alarmTime.value;
+  alert("Đã đặt lúc "+time);
+  let check=setInterval(()=>{
+    let now=new Date();
+    let h=String(now.getHours()).padStart(2,'0');
+    let m=String(now.getMinutes()).padStart(2,'0');
+    if(time===h+":"+m){
+      alert("ĐẾN GIỜ HỌC!");
+      clearInterval(check);
+    }
+  },1000);
+}
+
+// ===== LOGOUT =====
 function logout(){
   localStorage.removeItem("currentUser");
   location.reload();
 }
 
-let correctAnswer=0;
-
-function generateQuestion(){
-  let n=Math.floor(Math.random()*20)+1;
-  correctAnswer=Math.sqrt(n*n);
-  document.getElementById("question").innerText="√"+(n*n)+" = ?";
-}
-
-function checkAnswer(){
-  let ans=parseInt(document.getElementById("answer").value);
-  let u=localStorage.getItem("currentUser");
-  let users=getUsers();
-
-  if(ans===correctAnswer){
-    users[u].xp+=10;
-    alert("Đúng +10 XP");
-  }else{
-    alert("Sai rồi");
-  }
-
-  saveUsers(users);
-  document.getElementById("xp").innerText=users[u].xp;
-  generateQuestion();
-  updateLeaderboard();
-}
-
-function updateLeaderboard(){
-  let users=getUsers();
-  let arr=Object.keys(users).map(k=>({name:k,xp:users[k].xp}));
-  arr.sort((a,b)=>b.xp-a.xp);
-
-  let lb=document.getElementById("leaderboard");
-  lb.innerHTML="";
-  arr.slice(0,5).forEach(u=>{
-    let li=document.createElement("li");
-    li.innerText=u.name+" - "+u.xp+" XP";
-    lb.appendChild(li);
-  });
-}
-
-function setAlarm(){
-  let time=document.getElementById("alarmTime").value;
-  if(!time){alert("Chọn giờ");return;}
-  alert("Đã đặt báo thức "+time);
-  setInterval(()=>{
-    let now=new Date();
-    let current=now.getHours().toString().padStart(2,'0')+":"+now.getMinutes().toString().padStart(2,'0');
-    if(current===time){
-      alert("⏰ Tới giờ học rồi!");
-    }
-  },1000);
-}
-
+// ===== AUTO LOGIN =====
 window.onload=function(){
-  if(localStorage.getItem("currentUser")){
-    showMain();
-  }
+  let email=localStorage.getItem("currentUser");
+  if(email){showMain(email);}
 };
 
 </script>
+
 </body>
 </html>
