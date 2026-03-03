@@ -2,99 +2,182 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Báo Thức Vũ Trụ</title>
+<title>HTHT học tập web</title>
 
 <style>
-body {
-  margin: 0;
-  height: 100vh;
-  font-family: Arial, sans-serif;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
-  color: white;
-
-  /* Background vũ trụ gradient */
-  background: radial-gradient(circle at top, #1a2a6c, #000000);
+body{
+  margin:0;
+  font-family:Arial;
+  background:linear-gradient(135deg,#667eea,#764ba2);
+  color:white;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
 }
 
-.container {
-  background: rgba(0, 0, 0, 0.6);
-  padding: 30px;
-  border-radius: 20px;
-  text-align: center;
-  box-shadow: 0 0 40px rgba(0,0,0,0.8);
+.box{
+  background:#0008;
+  padding:25px;
+  border-radius:15px;
+  width:340px;
+  text-align:center;
 }
 
-h1 {
-  margin-bottom: 20px;
+input,button,select{
+  width:90%;
+  padding:8px;
+  margin:6px 0;
+  border:none;
+  border-radius:8px;
 }
 
-input {
-  padding: 10px;
-  border-radius: 10px;
-  border: none;
-  margin: 5px;
+button{
+  background:#00c3ff;
+  color:white;
+  cursor:pointer;
 }
 
-button {
-  padding: 10px 20px;
-  border-radius: 10px;
-  border: none;
-  background: #00c3ff;
-  color: white;
-  cursor: pointer;
-  transition: 0.3s;
+button:hover{
+  background:#0099cc;
 }
 
-button:hover {
-  background: #0099cc;
-}
+#clock{margin:8px 0;}
+.hidden{display:none;}
 </style>
 </head>
 
 <body>
 
-<div class="container">
-  <h1>⏰ Báo Thức</h1>
+<div class="box">
 
-  <input type="time" id="timeInput"><br>
-  <input type="text" id="nameInput" placeholder="Tên báo thức"><br>
+<h2>HTHT học tập web</h2>
 
-  <button onclick="setAlarm()">+ Báo Thức</button>
+<!-- LOGIN -->
+<div id="loginArea">
+  <input id="user" placeholder="Tên tài khoản">
+  <input id="pass" type="password" placeholder="Mật khẩu">
+  <button onclick="save()">Đăng ký</button>
+  <button onclick="login()">Đăng nhập</button>
+</div>
 
-  <h3 id="status"></h3>
+<!-- MAIN -->
+<div id="mainArea" class="hidden">
+
+  <h3 id="hello"></h3>
+  <p>⭐ Tổng điểm: <span id="score">0</span></p>
+
+  <!-- ĐỒNG HỒ -->
+  <div id="clock"></div>
+  <input type="time" id="alarm">
+  <button onclick="setAlarm()">Đặt báo thức</button>
+
+  <hr>
+
+  <!-- BÀI TẬP -->
+  <h3>Làm bài tập</h3>
+  <select id="grade">
+    <option value="1">Lớp 1</option>
+    <option value="2">Lớp 2</option>
+    <option value="3">Lớp 3</option>
+    <option value="4">Lớp 4</option>
+    <option value="5">Lớp 5</option>
+    <option value="6">Lớp 6</option>
+    <option value="7">Lớp 7</option>
+    <option value="8">Lớp 8</option>
+    <option value="9">Lớp 9</option>
+    <option value="10">Lớp 10</option>
+    <option value="11">Lớp 11</option>
+    <option value="12">Lớp 12</option>
+  </select>
+
+  <button onclick="generateQuestion()">Ra bài</button>
+
+  <p id="question"></p>
+  <input id="answer" placeholder="Nhập đáp án">
+  <button onclick="checkAnswer()">Nộp bài</button>
+
+  <p id="result"></p>
+
+  <button onclick="logout()">Đăng xuất</button>
+
+</div>
+
 </div>
 
 <script>
-let alarmTime = "";
-let alarmName = "";
+let alarmTime=null;
+let correctAnswer=0;
+let totalScore=0;
 
-function setAlarm() {
-  alarmTime = document.getElementById("timeInput").value;
-  alarmName = document.getElementById("nameInput").value;
-
-  if(alarmTime === "") {
-    alert("Chưa chọn giờ!");
-    return;
-  }
-
-  document.getElementById("status").innerHTML =
-    "Đã đặt: " + alarmTime + " - " + alarmName;
+/* ĐĂNG KÝ */
+function save(){
+  localStorage.user=user.value;
+  localStorage.pass=pass.value;
+  alert("Đã tạo tài khoản!");
 }
 
-setInterval(function() {
-  let now = new Date();
-  let currentTime =
-    now.getHours().toString().padStart(2,'0') + ":" +
-    now.getMinutes().toString().padStart(2,'0');
+/* LOGIN */
+function login(){
+  if(user.value==localStorage.user &&
+     pass.value==localStorage.pass){
 
-  if(currentTime === alarmTime) {
-    alert("⏰ Đến giờ: " + alarmName);
-    alarmTime = "";
+     loginArea.classList.add("hidden");
+     mainArea.classList.remove("hidden");
+     hello.innerHTML="Xin chào, "+user.value+" 👋";
+  }else{
+     alert("Sai tài khoản!");
   }
-}, 1000);
+}
+
+function logout(){
+  location.reload();
+}
+
+/* BÁO THỨC */
+function setAlarm(){
+  alarmTime=alarm.value;
+}
+
+setInterval(()=>{
+  let now=new Date();
+  clock.innerHTML="Bây giờ: "+now.toLocaleTimeString();
+
+  let current=now.getHours().toString().padStart(2,"0")+":"+
+              now.getMinutes().toString().padStart(2,"0");
+
+  if(current==alarmTime){
+    alert("⏰ Dậy học đi Nhàn!");
+    alarmTime=null;
+  }
+},1000);
+
+/* BÀI TẬP */
+function generateQuestion(){
+  let grade=parseInt(grade.value);
+
+  let a=Math.floor(Math.random()*grade*5)+1;
+  let b=Math.floor(Math.random()*grade*5)+1;
+
+  correctAnswer=a+b;
+  question.innerHTML="Tính: "+a+" + "+b+" = ?";
+  result.innerHTML="";
+}
+
+function checkAnswer(){
+  let grade=parseInt(document.getElementById("grade").value);
+  let userAnswer=parseInt(answer.value);
+
+  if(userAnswer===correctAnswer){
+    totalScore+=grade;
+    score.innerHTML=totalScore;
+    result.innerHTML="✅ Đúng! +" + grade + " điểm";
+  }else{
+    result.innerHTML="❌ Sai rồi!";
+  }
+
+  answer.value="";
+}
 </script>
 
 </body>
