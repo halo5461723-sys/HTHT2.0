@@ -2,41 +2,49 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>HTHT Web</title>
+<title>HTHT Pro</title>
 <style>
 body{
-    font-family: Arial;
+    font-family:Arial;
     text-align:center;
-    background:linear-gradient(135deg,#4facfe,#00f2fe);
+    background:linear-gradient(135deg,#667eea,#764ba2);
     margin:0;
+    color:white;
 }
 .box{
     background:white;
+    color:black;
     margin:20px auto;
     padding:20px;
     width:90%;
     max-width:500px;
-    border-radius:15px;
-    box-shadow:0 5px 15px rgba(0,0,0,0.2);
+    border-radius:20px;
+    box-shadow:0 10px 25px rgba(0,0,0,0.3);
 }
 button{
     padding:8px 15px;
     border:none;
     border-radius:10px;
     cursor:pointer;
-    background:#4facfe;
+    background:#667eea;
     color:white;
-}
-input{
-    padding:8px;
-    border-radius:8px;
-    border:1px solid #ccc;
 }
 .rank{
     border:2px solid gold;
-    border-radius:10px;
+    border-radius:12px;
     margin:5px;
-    padding:5px;
+    padding:8px;
+}
+.progressCircle{
+    width:120px;
+    height:120px;
+    border-radius:50%;
+    background:conic-gradient(#667eea 0%, #ddd 0%);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    margin:auto;
+    font-weight:bold;
 }
 img{
     width:80px;
@@ -50,7 +58,7 @@ img{
 
 <div class="box" id="setupBox">
 <h2>Nhập tên của bạn</h2>
-<input id="nameInput" placeholder="Tên của bạn">
+<input id="nameInput">
 <br><br>
 <button onclick="saveName()">Bắt đầu</button>
 </div>
@@ -66,93 +74,120 @@ img{
 <p>Điểm: <span id="score">0</span></p>
 <p>Tiến trình: <span id="progress">0%</span></p>
 
+<h3>Chọn lớp</h3>
+<select id="gradeSelect">
+<option value="1">Lớp 1</option>
+<option value="2">Lớp 2</option>
+<option value="3">Lớp 3</option>
+<option value="4">Lớp 4</option>
+<option value="5">Lớp 5</option>
+<option value="6">Lớp 6</option>
+<option value="7">Lớp 7</option>
+<option value="8">Lớp 8</option>
+<option value="9">Lớp 9</option>
+<option value="10">Lớp 10</option>
+<option value="11">Lớp 11</option>
+<option value="12">Lớp 12</option>
+</select>
+<br><br>
 <button onclick="startQuiz()">Làm bài</button>
-<button onclick="setAlarm()">Báo thức</button>
+
+<hr>
+
+<h3>⏰ Đặt báo thức</h3>
+<input id="alarmName" placeholder="Tên báo thức">
+<br><br>
+<input type="range" min="5" max="300" value="10" id="alarmRange" oninput="updateCircle()">
+<div class="progressCircle" id="circle">10s</div>
+<br>
+<button onclick="setAlarm()">Đặt báo thức</button>
+
+<hr>
 
 <h3>Bảng xếp hạng</h3>
 <div id="ranking"></div>
+
 </div>
 
 <script>
 let user = JSON.parse(localStorage.getItem("htht_user"));
 
-if(user){
-    showMain();
-}
+if(user){ showMain(); }
 
 function saveName(){
-    let name = document.getElementById("nameInput").value.trim();
+    let name = nameInput.value.trim();
     if(!name) return alert("Nhập tên đi");
-    user = {
-        name:name,
-        score:0,
-        progress:0,
-        avatar:"https://i.imgur.com/6VBx3io.png"
-    };
+    user={name:name,score:0,progress:0,avatar:"https://i.imgur.com/6VBx3io.png"};
     localStorage.setItem("htht_user",JSON.stringify(user));
     showMain();
 }
 
 function showMain(){
-    document.getElementById("setupBox").style.display="none";
-    document.getElementById("mainBox").style.display="block";
-    document.getElementById("hello").innerText="Xin chào "+user.name;
-    document.getElementById("score").innerText=user.score;
-    document.getElementById("progress").innerText=user.progress+"%";
-    document.getElementById("avatar").src=user.avatar;
+    setupBox.style.display="none";
+    mainBox.style.display="block";
+    hello.innerText="Xin chào "+user.name;
+    score.innerText=user.score;
+    progress.innerText=user.progress+"%";
+    avatar.src=user.avatar;
     updateRanking();
 }
 
 function startQuiz(){
-    let a = Math.floor(Math.random()*20)+1;
-    let b = Math.floor(Math.random()*20)+1;
-    let answer = prompt("Tính: "+a+" + "+b);
-    if(answer == a+b){
-        user.score+=10;
-        user.progress+=10;
-        alert("Đúng!");
-    }else{
-        alert("Sai rồi!");
-    }
+    let grade=parseInt(gradeSelect.value);
+    let max=grade*10;
+    let a=Math.floor(Math.random()*max)+1;
+    let b=Math.floor(Math.random()*max)+1;
+    let ans=prompt("Lớp "+grade+": "+a+" + "+b+" = ?");
+    if(ans==a+b){
+        user.score+=grade;
+        user.progress+=grade;
+        alert("Đúng +"+grade+" điểm");
+    }else alert("Sai!");
     localStorage.setItem("htht_user",JSON.stringify(user));
     showMain();
 }
 
-function changeAvatar(event){
-    let file = event.target.files[0];
-    let reader = new FileReader();
+function changeAvatar(e){
+    let file=e.target.files[0];
+    let reader=new FileReader();
     reader.onload=function(){
-        user.avatar = reader.result;
+        user.avatar=reader.result;
         localStorage.setItem("htht_user",JSON.stringify(user));
-        document.getElementById("avatar").src=user.avatar;
+        avatar.src=user.avatar;
     }
     reader.readAsDataURL(file);
 }
 
 function updateRanking(){
-    let list = JSON.parse(localStorage.getItem("htht_ranking")) || [];
-    let found = list.find(u=>u.name===user.name);
-    if(!found){
-        list.push(user);
-    }else{
-        found.score=user.score;
-    }
+    let list=JSON.parse(localStorage.getItem("htht_rank"))||[];
+    let f=list.find(u=>u.name===user.name);
+    if(!f) list.push(user);
+    else f.score=user.score;
     list.sort((a,b)=>b.score-a.score);
-    localStorage.setItem("htht_ranking",JSON.stringify(list));
-    let html="";
+    localStorage.setItem("htht_rank",JSON.stringify(list));
+    ranking.innerHTML="";
     list.forEach((u,i)=>{
-        html+=`<div class="rank">${i+1}. ${u.name} - ${u.score} điểm</div>`;
+        ranking.innerHTML+=`<div class="rank">${i+1}. ${u.name} - ${u.score} điểm</div>`;
     });
-    document.getElementById("ranking").innerHTML=html;
+}
+
+function updateCircle(){
+    let val=alarmRange.value;
+    let percent=(val/300)*100;
+    circle.style.background=`conic-gradient(#667eea ${percent}%, #ddd ${percent}%)`;
+    circle.innerText=val+"s";
 }
 
 function setAlarm(){
-    let sec = prompt("Nhập số giây:");
-    if(!sec) return;
+    let sec=alarmRange.value;
+    let name=alarmName.value||"Báo thức";
+    alert("Đã đặt "+name+" sau "+sec+" giây");
     setTimeout(()=>{
-        alert("⏰ Báo thức!");
+        alert("⏰ "+name+" kêu rồi!");
     },sec*1000);
 }
+
+updateCircle();
 </script>
 
 </body>
