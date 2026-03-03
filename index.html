@@ -2,19 +2,14 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>HTHT Account</title>
+<title>HTHT Full</title>
 <style>
-body{
-  font-family: Arial;
-  background:#eef2ff;
-  text-align:center;
-  margin:0;
-}
-.container{
+body{font-family:Arial;background:#eef2ff;text-align:center;margin:0}
+.box{
   background:white;
   width:90%;
-  max-width:400px;
-  margin:40px auto;
+  max-width:420px;
+  margin:20px auto;
   padding:20px;
   border-radius:12px;
   box-shadow:0 0 10px #ccc;
@@ -26,141 +21,151 @@ input,button{
   border-radius:6px;
   border:1px solid #ccc;
 }
-button{
-  background:#4f46e5;
-  color:white;
-  border:none;
-}
-button:hover{
-  opacity:0.9;
-}
-.hidden{
-  display:none;
-}
-.small{
-  font-size:13px;
-  color:gray;
+button{background:#4f46e5;color:white;border:none}
+.hidden{display:none}
+img{
+  width:100px;
+  height:100px;
+  border-radius:50%;
+  object-fit:cover;
 }
 </style>
 </head>
 <body>
 
-<div class="container" id="authBox">
-
-<h3>Đăng Ký</h3>
-<input type="email" id="regEmail" placeholder="Email">
-<input type="password" id="regPass" placeholder="Mật khẩu">
-<input type="text" id="regName" placeholder="Tên hiển thị">
-<button onclick="register()">Tạo tài khoản</button>
-
-<hr>
-
-<h3>Đăng Nhập</h3>
-<input type="email" id="loginEmail" placeholder="Email">
-<input type="password" id="loginPass" placeholder="Mật khẩu">
-<button onclick="login()">Đăng nhập</button>
-
-<p class="small">Dữ liệu lưu trên máy này</p>
-
+<div class="box" id="setupBox">
+<h3>Nhập tên của bạn</h3>
+<input type="text" id="nameInput" placeholder="Tên của bạn">
+<input type="file" id="avatarInput" accept="image/*">
+<button onclick="saveUser()">Bắt đầu</button>
 </div>
 
-<div class="container hidden" id="mainBox">
+<div class="box hidden" id="mainBox">
 <h2 id="welcome"></h2>
-<p>Email: <span id="showEmail"></span></p>
-<button onclick="logout()">Đăng xuất</button>
+
+<button onclick="showProfile()">Profile</button>
+<button onclick="showMath()">Làm Toán</button>
+<button onclick="showRank()">Xếp hạng</button>
+
+<div id="content"></div>
 </div>
 
 <script>
 
-// Lấy users
+// ===== LẤY USERS =====
 function getUsers(){
-  return JSON.parse(localStorage.getItem("users") || "{}");
+  return JSON.parse(localStorage.getItem("users") || "[]");
+}
+function saveUsers(u){
+  localStorage.setItem("users", JSON.stringify(u));
 }
 
-// Lưu users
-function saveUsers(users){
-  localStorage.setItem("users", JSON.stringify(users));
-}
+// ===== TẠO USER =====
+function saveUser(){
+  let name = nameInput.value.trim();
+  let file = avatarInput.files[0];
 
-// Đăng ký
-function register(){
-  let email = document.getElementById("regEmail").value.trim().toLowerCase();
-  let pass = document.getElementById("regPass").value;
-  let name = document.getElementById("regName").value.trim();
-
-  if(!email || !pass || !name){
-    alert("Không được để trống");
-    return;
-  }
+  if(!name){ alert("Nhập tên đi 😑"); return; }
 
   let users = getUsers();
 
-  if(users[email]){
-    alert("Email đã tồn tại");
+  if(users.find(u=>u.name===name)){
+    alert("Tên đã tồn tại");
     return;
   }
 
-  for(let e in users){
-    if(users[e].name === name){
-      alert("Tên hiển thị đã tồn tại");
-      return;
-    }
-  }
+  let reader = new FileReader();
+  reader.onload = function(e){
+    let user = {
+      name:name,
+      avatar:e.target.result || "",
+      score:0
+    };
 
-  users[email] = {
-    password: pass,
-    name: name
+    users.push(user);
+    saveUsers(users);
+    localStorage.setItem("currentUser", name);
+    showMain(user);
   };
 
+  if(file){
+    reader.readAsDataURL(file);
+  }else{
+    reader.onload({target:{result:""}});
+  }
+}
+
+// ===== MAIN =====
+function showMain(user){
+  setupBox.classList.add("hidden");
+  mainBox.classList.remove("hidden");
+  welcome.innerText="Xin chào "+user.name;
+}
+
+// ===== PROFILE =====
+function showProfile(){
+  let users=getUsers();
+  let name=localStorage.getItem("currentUser");
+  let u=users.find(x=>x.name===name);
+
+  content.innerHTML=`
+  <h3>Profile</h3>
+  <img src="${u.avatar || 'https://via.placeholder.com/100'}"><br>
+  <p>Tên: ${u.name}</p>
+  <p>Điểm: ${u.score}</p>
+  `;
+}
+
+// ===== TOÁN =====
+let currentAnswer=0;
+function showMath(){
+  let n=Math.floor(Math.random()*50)+1;
+  currentAnswer=Math.sqrt(n).toFixed(2);
+  content.innerHTML=`
+  <h3>√${n} = ? (2 số)</h3>
+  <input id="mathAns">
+  <button onclick="checkMath()">Nộp</button>
+  `;
+}
+
+function checkMath(){
+  let ans=parseFloat(mathAns.value).toFixed(2);
+  let users=getUsers();
+  let name=localStorage.getItem("currentUser");
+  let u=users.find(x=>x.name===name);
+
+  if(ans==currentAnswer){
+    alert("Đúng!");
+    u.score+=10;
+  }else{
+    alert("Sai! Đáp án "+currentAnswer);
+  }
+
   saveUsers(users);
-  alert("Tạo tài khoản thành công!");
 }
 
-// Đăng nhập
-function login(){
-  let email = document.getElementById("loginEmail").value.trim().toLowerCase();
-  let pass = document.getElementById("loginPass").value;
+// ===== XẾP HẠNG =====
+function showRank(){
+  let users=getUsers();
+  users.sort((a,b)=>b.score-a.score);
 
-  let users = getUsers();
+  let html="<h3>Bảng xếp hạng</h3>";
+  users.forEach((u,i)=>{
+    html+=`
+    <p>${i+1}. ${u.name} - ${u.score} điểm</p>
+    `;
+  });
 
-  if(!users[email]){
-    alert("Email không tồn tại");
-    return;
-  }
-
-  if(users[email].password !== pass){
-    alert("Sai mật khẩu");
-    return;
-  }
-
-  localStorage.setItem("currentUser", email);
-  showMain(email);
+  content.innerHTML=html;
 }
 
-// Hiển thị sau login
-function showMain(email){
-  let users = getUsers();
-
-  document.getElementById("authBox").classList.add("hidden");
-  document.getElementById("mainBox").classList.remove("hidden");
-
-  document.getElementById("welcome").innerText =
-    "Xin chào " + users[email].name;
-
-  document.getElementById("showEmail").innerText = email;
-}
-
-// Đăng xuất
-function logout(){
-  localStorage.removeItem("currentUser");
-  location.reload();
-}
-
-// Tự login nếu còn phiên
-window.onload = function(){
-  let email = localStorage.getItem("currentUser");
-  if(email){
-    showMain(email);
+// ===== AUTO LOAD =====
+window.onload=function(){
+  let name=localStorage.getItem("currentUser");
+  if(name){
+    let users=getUsers();
+    let u=users.find(x=>x.name===name);
+    if(u) showMain(u);
   }
 };
 
