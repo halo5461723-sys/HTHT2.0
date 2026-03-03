@@ -1,21 +1,93 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>HTHT 2.0</title>
-</head>
+    <title>App Báo Thức</title>
+    <style>
+        body {
+            font-family: Arial;
+            text-align: center;
+            margin-top: 50px;
+            background: #f2f2f2;
+        }
 
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            margin: 10px;
+            cursor: pointer;
+        }
+
+        input {
+            padding: 8px;
+            margin: 5px;
+        }
+
+        .alarm-item {
+            margin-top: 10px;
+            background: white;
+            padding: 10px;
+            border-radius: 8px;
+            width: 250px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+    </style>
+</head>
 <body>
 
-  <h1>Chào mừng đến HTHT 2.0 😎</h1>
-  <p>Web mới của Nhàn đây.</p>
+    <h1>🔔 App Báo Thức</h1>
 
-  <button onclick="hello()">Bấm thử</button>
+    <button onclick="showForm()">+ Báo thức</button>
 
-  <script>
-    function hello() {
-      alert("Web hoạt động rồi 🚀");
-    }
-  </script>
+    <div id="form" style="display:none;">
+        <br>
+        <input type="time" id="alarmTime">
+        <br>
+        <input type="text" id="alarmName" placeholder="Tên báo thức">
+        <br>
+        <button onclick="setAlarm()">Lưu</button>
+    </div>
+
+    <div id="alarmList"></div>
+
+    <script>
+        let alarms = [];
+
+        function showForm() {
+            document.getElementById("form").style.display = "block";
+        }
+
+        function setAlarm() {
+            let time = document.getElementById("alarmTime").value;
+            let name = document.getElementById("alarmName").value;
+
+            if (time === "" || name === "") {
+                alert("Nhập đầy đủ thông tin!");
+                return;
+            }
+
+            alarms.push({time, name});
+
+            let div = document.createElement("div");
+            div.className = "alarm-item";
+            div.innerHTML = "⏰ " + time + " - " + name;
+
+            document.getElementById("alarmList").appendChild(div);
+
+            document.getElementById("form").style.display = "none";
+        }
+
+        setInterval(function() {
+            let now = new Date();
+            let currentTime = now.toTimeString().slice(0,5);
+
+            alarms.forEach(function(alarm) {
+                if (alarm.time === currentTime) {
+                    alert("🔔 Đến giờ: " + alarm.name);
+                }
+            });
+        }, 1000);
+    </script>
 
 </body>
 </html>
