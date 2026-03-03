@@ -2,28 +2,28 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>HTHT FULL PROFILE</title>
+<title>HTHT FULL FIXED</title>
 
 <style>
 body{
   font-family:Arial;
-  background:linear-gradient(135deg,#d7f0ff,#ffffff);
+  background:linear-gradient(135deg,#e3f2fd,#ffffff);
   text-align:center;
   margin:0;
 }
 
 .box{
   background:white;
-  width:430px;
-  margin:25px auto;
+  width:400px;
+  margin:30px auto;
   padding:20px;
   border-radius:15px;
-  box-shadow:0 0 15px rgba(0,0,0,0.1);
+  box-shadow:0 0 10px rgba(0,0,0,0.1);
 }
 
 input,select,button{
   padding:8px;
-  margin:5px;
+  margin:6px;
   width:90%;
 }
 
@@ -34,9 +34,11 @@ button{cursor:pointer;}
 
 <body>
 
-<h2>HTHT PROFILE 34 TỈNH</h2>
+<h2>HTHT FULL LOGIN + PROFILE</h2>
 
+<!-- AUTH -->
 <div class="box" id="authBox">
+
   <h3>Đăng ký</h3>
   <input id="regUser" placeholder="Tài khoản">
   <input id="regPass" type="password" placeholder="Mật khẩu">
@@ -48,8 +50,10 @@ button{cursor:pointer;}
   <input id="loginUser" placeholder="Tài khoản">
   <input id="loginPass" type="password" placeholder="Mật khẩu">
   <button onclick="login()">Đăng nhập</button>
+
 </div>
 
+<!-- MAIN -->
 <div class="box hidden" id="mainBox">
 
   <h3 id="welcome"></h3>
@@ -101,7 +105,7 @@ button{cursor:pointer;}
       <option>Tây Ninh</option>
     </select>
 
-    <button onclick="saveProfile()">Lưu profile</button>
+    <button onclick="saveProfile()">Lưu Profile</button>
 
     <hr>
 
@@ -112,101 +116,123 @@ button{cursor:pointer;}
 </div>
 
 <script>
-let users = JSON.parse(localStorage.getItem("users")) || {};
-let currentUser = localStorage.getItem("currentUser");
+function getUsers(){
+  return JSON.parse(localStorage.getItem("users")) || {};
+}
 
-function save(){
+function saveUsers(users){
   localStorage.setItem("users", JSON.stringify(users));
 }
 
 function register(){
-  let u = regUser.value.trim();
-  let p = regPass.value.trim();
+  let username = document.getElementById("regUser").value.trim();
+  let password = document.getElementById("regPass").value.trim();
 
-  if(!u || !p){
+  if(username === "" || password === ""){
     alert("Không để trống");
     return;
   }
 
-  if(users[u]){
+  let users = getUsers();
+
+  if(users[username]){
     alert("Tài khoản đã tồn tại");
     return;
   }
 
-  users[u] = {
-    password:p,
-    displayName:"",
-    province:""
+  users[username] = {
+    password: password,
+    displayName: "",
+    province: ""
   };
 
-  save();
+  saveUsers(users);
+
   alert("Tạo thành công! Giờ đăng nhập.");
 }
 
 function login(){
-  let u = loginUser.value.trim();
-  let p = loginPass.value.trim();
+  let username = document.getElementById("loginUser").value.trim();
+  let password = document.getElementById("loginPass").value.trim();
 
-  if(!users[u]){
+  let users = getUsers();
+
+  if(!users[username]){
     alert("Không tồn tại tài khoản");
     return;
   }
 
-  if(users[u].password !== p){
+  if(users[username].password !== password){
     alert("Sai mật khẩu");
     return;
   }
 
-  currentUser = u;
-  localStorage.setItem("currentUser", u);
-  loadUser();
+  localStorage.setItem("currentUser", username);
+  showMain(username);
+}
+
+function showMain(username){
+  document.getElementById("authBox").classList.add("hidden");
+  document.getElementById("mainBox").classList.remove("hidden");
+  document.getElementById("welcome").innerText = "Xin chào " + username;
+  loadProfile();
 }
 
 function logout(){
   localStorage.removeItem("currentUser");
-  currentUser=null;
-  authBox.classList.remove("hidden");
-  mainBox.classList.add("hidden");
-}
-
-function loadUser(){
-  currentUser = localStorage.getItem("currentUser");
-
-  if(currentUser && users[currentUser]){
-    authBox.classList.add("hidden");
-    mainBox.classList.remove("hidden");
-    welcome.innerText="Xin chào " + currentUser;
-    showProfileInfo();
-  }
+  document.getElementById("authBox").classList.remove("hidden");
+  document.getElementById("mainBox").classList.add("hidden");
 }
 
 function toggleProfile(){
-  profileBox.classList.toggle("hidden");
+  document.getElementById("profileBox").classList.toggle("hidden");
+  loadProfile();
+}
 
-  if(!profileBox.classList.contains("hidden")){
-    let u = users[currentUser];
-    displayName.value = u.displayName;
-    province.value = u.province;
-    showProfileInfo();
-  }
+function loadProfile(){
+  let user = localStorage.getItem("currentUser");
+  if(!user) return;
+
+  let users = getUsers();
+  let u = users[user];
+
+  document.getElementById("displayName").value = u.displayName || "";
+  document.getElementById("province").value = u.province || "";
+  showProfileInfo();
 }
 
 function saveProfile(){
-  users[currentUser].displayName = displayName.value.trim();
-  users[currentUser].province = province.value;
-  save();
+  let user = localStorage.getItem("currentUser");
+  let users = getUsers();
+
+  users[user].displayName = document.getElementById("displayName").value.trim();
+  users[user].province = document.getElementById("province").value;
+
+  saveUsers(users);
   showProfileInfo();
   alert("Lưu thành công");
 }
 
 function showProfileInfo(){
-  let u = users[currentUser];
-  profileInfo.innerText =
+  let user = localStorage.getItem("currentUser");
+  if(!user) return;
+
+  let users = getUsers();
+  let u = users[user];
+
+  document.getElementById("profileInfo").innerText =
     "Tên hiển thị: " + (u.displayName || "Chưa đặt") +
     " | Tỉnh: " + (u.province || "Chưa chọn");
 }
 
-loadUser();
+function checkLogin(){
+  let user = localStorage.getItem("currentUser");
+  if(user){
+    showMain(user);
+  }
+}
+
+checkLogin();
 </script>
 
 </body>
