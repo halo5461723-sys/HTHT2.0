@@ -2,187 +2,154 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>HTHT V6 Multi User Stable</title>
+<title>HTHT V7</title>
 <style>
-body{
-  font-family:Arial;
-  margin:0;
-  color:#fff;
-  background:radial-gradient(ellipse at bottom,#0d1b2a 0%,#000814 70%);
-}
-.container{max-width:500px;margin:auto;padding:20px}
-input,button{padding:10px;margin:5px 0;width:100%;border-radius:8px;border:none}
-button{background:#00b4d8;color:#fff;font-weight:bold;cursor:pointer}
+body{margin:0;font-family:Arial;color:white;background:radial-gradient(circle at bottom,#0d1b2a 0%,#000814 70%);} 
+.container{max-width:900px;margin:auto;padding:20px}
+input,select,button{padding:8px;margin:5px 0;border-radius:8px;border:none}
+button{background:#00b4d8;color:white;font-weight:bold;cursor:pointer}
 .card{background:rgba(255,255,255,0.07);padding:15px;border-radius:12px;margin-top:15px}
-.rank-item{background:rgba(255,255,255,0.05);padding:8px;border-radius:8px;margin:5px 0}
+.rank-item{display:flex;align-items:center;background:rgba(255,255,255,0.05);padding:8px;border-radius:8px;margin:5px 0}
+.rank-item img{width:40px;height:40px;border-radius:50%;margin-right:10px}
+.footer{text-align:center;margin-top:40px;opacity:0.7}
 </style>
 </head>
 <body>
 <div class="container" id="app"></div><script>
+const USERS_KEY="htht_users";
+const CURRENT_KEY="htht_current";
+const VERSION="V7";
 
-// ===== STORAGE KEYS =====
-const USERS_KEY = "htht_users";
-const CURRENT_KEY = "htht_current";
+function getUsers(){return JSON.parse(localStorage.getItem(USERS_KEY))||[]}
+function saveUsers(u){localStorage.setItem(USERS_KEY,JSON.stringify(u))}
+function getCurrent(){return localStorage.getItem(CURRENT_KEY)}
+function setCurrent(u){localStorage.setItem(CURRENT_KEY,u)}
+function logout(){localStorage.removeItem(CURRENT_KEY);location.reload()}
 
-// ===== GET USERS =====
-function getUsers(){
-  return JSON.parse(localStorage.getItem(USERS_KEY)) || [];
-}
-
-function saveUsers(users){
-  localStorage.setItem(USERS_KEY, JSON.stringify(users));
-}
-
-function getCurrentUser(){
-  return localStorage.getItem(CURRENT_KEY);
-}
-
-function setCurrentUser(username){
-  localStorage.setItem(CURRENT_KEY, username);
-}
-
-function logout(){
-  localStorage.removeItem(CURRENT_KEY);
-  location.reload();
-}
-
-// ===== REGISTER =====
 function register(){
-  const username = document.getElementById("regUser").value.trim();
-  const password = document.getElementById("regPass").value.trim();
+let users=getUsers();
+let u=document.getElementById("rUser").value.trim();
+let p=document.getElementById("rPass").value.trim();
+if(!u||!p)return alert("Nhập đủ!");
+if(users.find(x=>x.username===u))return alert("Tồn tại!");
+users.push({username:u,password:p,score:0,daily:0,last:"",avatar:"",school:"",class:"",province:"",alarms:[]});
+saveUsers(users);
+alert("Đăng ký thành công");renderLogin();}
 
-  if(!username || !password){
-    alert("Nhập đầy đủ thông tin!");
-    return;
-  }
-
-  let users = getUsers();
-
-  if(users.find(u=>u.username===username)){
-    alert("Tài khoản đã tồn tại!");
-    return;
-  }
-
-  users.push({
-    username,
-    password,
-    score:0,
-    dailyCount:0,
-    lastDate:""
-  });
-
-  saveUsers(users);
-  alert("Đăng ký thành công!");
-  renderLogin();
-}
-
-// ===== LOGIN =====
 function login(){
-  const username = document.getElementById("loginUser").value.trim();
-  const password = document.getElementById("loginPass").value.trim();
+let u=document.getElementById("lUser").value.trim();
+let p=document.getElementById("lPass").value.trim();
+let user=getUsers().find(x=>x.username===u&&x.password===p);
+if(!user)return alert("Sai!");
+setCurrent(u);renderHome();}
 
-  const users = getUsers();
-  const user = users.find(u=>u.username===username && u.password===password);
+function dailyCheck(user){
+let today=new Date().toLocaleDateString();
+if(user.last!==today){user.last=today;user.daily=0}
+if(user.daily>=10)return false;
+user.daily++;return true;}
 
-  if(!user){
-    alert("Sai tài khoản hoặc mật khẩu!");
-    return;
-  }
-
-  setCurrentUser(username);
-  renderHome();
-}
-
-// ===== DAILY LIMIT =====
-function canDoQuiz(user){
-  const today = new Date().toLocaleDateString();
-
-  if(user.lastDate !== today){
-    user.lastDate = today;
-    user.dailyCount = 0;
-  }
-
-  if(user.dailyCount >= 10){
-    alert("Hôm nay đủ 10 lần rồi!");
-    return false;
-  }
-
-  user.dailyCount++;
-  return true;
-}
-
-// ===== DO QUIZ =====
 function doQuiz(){
-  let users = getUsers();
-  let username = getCurrentUser();
-  let user = users.find(u=>u.username===username);
+let users=getUsers();
+let user=users.find(x=>x.username===getCurrent());
+if(!dailyCheck(user))return alert("Đủ 10 lần hôm nay!");
+user.score+=10;saveUsers(users);renderHome();}
 
-  if(!canDoQuiz(user)) return;
+function saveProfile(){
+let users=getUsers();
+let user=users.find(x=>x.username===getCurrent());
+user.school=document.getElementById("school").value;
+user.class=document.getElementById("class").value;
+user.province=document.getElementById("province").value;
+saveUsers(users);alert("Đã lưu profile");}
 
-  user.score += 10;
+function uploadAvatar(e){
+let reader=new FileReader();
+reader.onload=function(){
+let users=getUsers();
+let user=users.find(x=>x.username===getCurrent());
+user.avatar=reader.result;saveUsers(users);renderHome();}
+reader.readAsDataURL(e.files[0]);}
 
-  saveUsers(users);
-  renderHome();
-}
+function addAlarm(){
+let name=document.getElementById("alarmName").value;
+let time=document.getElementById("alarmTime").value;
+if(!name||!time)return alert("Nhập đủ!");
+let users=getUsers();
+let user=users.find(x=>x.username===getCurrent());
+user.alarms.push({name,time});saveUsers(users);renderHome();}
 
-// ===== RANKING =====
+function deleteAlarm(i){
+let users=getUsers();
+let user=users.find(x=>x.username===getCurrent());
+user.alarms.splice(i,1);saveUsers(users);renderHome();}
+
 function renderRanking(){
-  let users = getUsers();
-  users.sort((a,b)=>b.score-a.score);
+let users=getUsers().sort((a,b)=>b.score-a.score);
+return users.map((u,i)=>`<div class='rank-item'>
+<img src='${u.avatar||"https://via.placeholder.com/40"}'>
+${i+1}. ${u.username} - ${u.score}đ<br>
+<small>${u.province||""} ${u.school||""} ${u.class||""}</small>
+</div>`).join("");}
 
-  return users.map((u,i)=>
-    `<div class="rank-item">${i+1}. ${u.username} - ${u.score} điểm</div>`
-  ).join("");
-}
-
-// ===== HOME =====
 function renderHome(){
-  let users = getUsers();
-  let username = getCurrentUser();
-  let user = users.find(u=>u.username===username);
+let users=getUsers();
+let user=users.find(x=>x.username===getCurrent());
 
-  document.getElementById("app").innerHTML = `
-    <h2>Xin chào ${user.username}</h2>
-    <div class="card">
-      <p>Điểm: <b>${user.score}</b></p>
-      <p>Lần hôm nay: ${user.dailyCount}/10</p>
-      <button onclick="doQuiz()">Làm bài (+10)</button>
-      <button onclick="logout()">Đăng xuất</button>
-    </div>
-    <h3>Bảng xếp hạng</h3>
-    ${renderRanking()}
-  `;
-}
+let alarmHTML=user.alarms.map((a,i)=>`<div>${a.name} - ${a.time} <button onclick='deleteAlarm(${i})'>X</button></div>`).join("");
 
-// ===== LOGIN FORM =====
+document.getElementById("app").innerHTML=`
+<h2>Xin chào ${user.username}</h2>
+<div class='card'>
+<p>Điểm: <b>${user.score}</b></p>
+<p>Lượt hôm nay: ${user.daily}/10</p>
+<button onclick='doQuiz()'>Làm bài +10</button>
+<button onclick='logout()'>Đăng xuất</button>
+</div>
+
+<div class='card'>
+<h3>Profile</h3>
+<img src='${user.avatar||"https://via.placeholder.com/80"}' width='80' style='border-radius:50%'><br>
+<input type='file' onchange='uploadAvatar(this)'><br>
+<select id='province'><option>${user.province||"Tỉnh"}</option><option>Hà Nội</option><option>TPHCM</option><option>Đà Nẵng</option></select><br>
+<input id='school' placeholder='Trường' value='${user.school||""}'><br>
+<input id='class' placeholder='Lớp' value='${user.class||""}'><br>
+<button onclick='saveProfile()'>Lưu Profile</button>
+</div>
+
+<div class='card'>
+<h3>Báo thức</h3>
+<input id='alarmName' placeholder='Tên báo thức'>
+<input id='alarmTime' type='time'>
+<button onclick='addAlarm()'>Thêm</button>
+${alarmHTML}
+</div>
+
+<div class='card'>
+<h3>Bảng xếp hạng</h3>
+${renderRanking()}
+</div>
+
+<div class='footer'>HTHT ${VERSION} | Liên hệ admin: 0585256245</div>
+`}
+
 function renderLogin(){
-  document.getElementById("app").innerHTML = `
-    <h2>Đăng nhập</h2>
-    <input id="loginUser" placeholder="Tài khoản">
-    <input id="loginPass" type="password" placeholder="Mật khẩu">
-    <button onclick="login()">Đăng nhập</button>
-    <p>Chưa có tài khoản?</p>
-    <button onclick="renderRegister()">Đăng ký</button>
-  `;
-}
+document.getElementById("app").innerHTML=`
+<h2>Đăng nhập</h2>
+<input id='lUser' placeholder='Tài khoản'>
+<input id='lPass' type='password' placeholder='Mật khẩu'>
+<button onclick='login()'>Đăng nhập</button>
+<p>Chưa có tài khoản?</p>
+<button onclick='renderRegister()'>Đăng ký</button>`}
 
-// ===== REGISTER FORM =====
 function renderRegister(){
-  document.getElementById("app").innerHTML = `
-    <h2>Đăng ký</h2>
-    <input id="regUser" placeholder="Tài khoản">
-    <input id="regPass" type="password" placeholder="Mật khẩu">
-    <button onclick="register()">Tạo tài khoản</button>
-    <button onclick="renderLogin()">Quay lại</button>
-  `;
-}
+document.getElementById("app").innerHTML=`
+<h2>Đăng ký</h2>
+<input id='rUser' placeholder='Tài khoản'>
+<input id='rPass' type='password' placeholder='Mật khẩu'>
+<button onclick='register()'>Tạo tài khoản</button>
+<button onclick='renderLogin()'>Quay lại</button>`}
 
-// ===== START =====
-if(getCurrentUser()){
-  renderHome();
-}else{
-  renderLogin();
-}
-
+if(getCurrent())renderHome();else renderLogin();
 </script></body>
 </html>
