@@ -2,237 +2,235 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>HTHT FULL FIXED</title>
+<title>HTHT - Web Học Tập</title>
 
 <style>
 body{
-  font-family:Arial;
-  background:linear-gradient(135deg,#e3f2fd,#ffffff);
-  text-align:center;
-  margin:0;
+    font-family: Arial;
+    background:#f2f6ff;
+    margin:0;
+    text-align:center;
 }
-
-.box{
-  background:white;
-  width:400px;
-  margin:30px auto;
-  padding:20px;
-  border-radius:15px;
-  box-shadow:0 0 10px rgba(0,0,0,0.1);
+header{
+    background:#2563eb;
+    color:white;
+    padding:15px;
 }
-
-input,select,button{
-  padding:8px;
-  margin:6px;
-  width:90%;
+button{
+    padding:8px 15px;
+    margin:5px;
+    border:none;
+    border-radius:6px;
+    background:#2563eb;
+    color:white;
+    cursor:pointer;
 }
-
-button{cursor:pointer;}
-.hidden{display:none;}
+input{
+    padding:8px;
+    margin:5px;
+}
+.card{
+    background:white;
+    width:300px;
+    margin:20px auto;
+    padding:20px;
+    border-radius:10px;
+    box-shadow:0 0 10px rgba(0,0,0,0.1);
+}
+.hidden{ display:none; }
+.rank1{ color:gold; font-weight:bold; }
+.rank2{ color:silver; font-weight:bold; }
+.rank3{ color:#cd7f32; font-weight:bold; }
 </style>
 </head>
 
 <body>
 
-<h2>HTHT FULL LOGIN + PROFILE</h2>
+<header>
+<h2>HTHT - Web Học Tập</h2>
+</header>
 
-<!-- AUTH -->
-<div class="box" id="authBox">
+<!-- LOGIN -->
+<div id="loginBox" class="card">
+<h3>Đăng nhập</h3>
+<input id="loginUser" placeholder="Tài khoản"><br>
+<input id="loginPass" type="password" placeholder="Mật khẩu"><br>
+<button onclick="login()">Đăng nhập</button>
+<button onclick="showRegister()">Tạo tài khoản</button>
+</div>
 
-  <h3>Đăng ký</h3>
-  <input id="regUser" placeholder="Tài khoản">
-  <input id="regPass" type="password" placeholder="Mật khẩu">
-  <button onclick="register()">Tạo tài khoản</button>
-
-  <hr>
-
-  <h3>Đăng nhập</h3>
-  <input id="loginUser" placeholder="Tài khoản">
-  <input id="loginPass" type="password" placeholder="Mật khẩu">
-  <button onclick="login()">Đăng nhập</button>
-
+<!-- REGISTER -->
+<div id="registerBox" class="card hidden">
+<h3>Tạo tài khoản</h3>
+<input id="regUser" placeholder="Tài khoản"><br>
+<input id="regPass" type="password" placeholder="Mật khẩu"><br>
+<button onclick="register()">Tạo</button>
+<button onclick="backLogin()">Quay lại</button>
 </div>
 
 <!-- MAIN -->
-<div class="box hidden" id="mainBox">
+<div id="mainBox" class="hidden">
 
-  <h3 id="welcome"></h3>
+<div class="card">
+<h3>👤 Profile</h3>
+<p id="profileName"></p>
+<p id="profileScore"></p>
+<button onclick="logout()">Đăng xuất</button>
+</div>
 
-  <button onclick="toggleProfile()">Mở / Đóng Profile</button>
-  <button onclick="logout()">Đăng xuất</button>
+<div class="card">
+<h3>📘 Bài Toán</h3>
+<p id="question"></p>
+<input id="answer" placeholder="Đáp án">
+<button onclick="checkAnswer()">Làm bài</button>
+<p id="result"></p>
+</div>
 
-  <div id="profileBox" class="hidden">
+<div class="card">
+<h3>🏆 Xếp Hạng</h3>
+<div id="ranking"></div>
+</div>
 
-    <h3>Hồ sơ cá nhân</h3>
-
-    <input id="displayName" placeholder="Tên hiển thị">
-
-    <select id="province">
-      <option value="">-- Chọn tỉnh --</option>
-      <option>Hà Nội</option>
-      <option>TP Hồ Chí Minh</option>
-      <option>Hải Phòng</option>
-      <option>Đà Nẵng</option>
-      <option>Cần Thơ</option>
-      <option>An Giang</option>
-      <option>Bà Rịa - Vũng Tàu</option>
-      <option>Bắc Giang</option>
-      <option>Bắc Ninh</option>
-      <option>Bến Tre</option>
-      <option>Bình Dương</option>
-      <option>Bình Phước</option>
-      <option>Bình Thuận</option>
-      <option>Cà Mau</option>
-      <option>Cao Bằng</option>
-      <option>Đắk Lắk</option>
-      <option>Đồng Nai</option>
-      <option>Đồng Tháp</option>
-      <option>Gia Lai</option>
-      <option>Hà Tĩnh</option>
-      <option>Hưng Yên</option>
-      <option>Khánh Hòa</option>
-      <option>Kiên Giang</option>
-      <option>Lâm Đồng</option>
-      <option>Lạng Sơn</option>
-      <option>Lào Cai</option>
-      <option>Long An</option>
-      <option>Nam Định</option>
-      <option>Nghệ An</option>
-      <option>Ninh Bình</option>
-      <option>Phú Thọ</option>
-      <option>Quảng Ninh</option>
-      <option>Sóc Trăng</option>
-      <option>Tây Ninh</option>
-    </select>
-
-    <button onclick="saveProfile()">Lưu Profile</button>
-
-    <hr>
-
-    <p id="profileInfo"></p>
-
-  </div>
+<div class="card">
+<h3>⏰ Báo Thức Học</h3>
+<input type="time" id="alarmTime">
+<button onclick="setAlarm()">Đặt</button>
+<p id="alarmStatus"></p>
+</div>
 
 </div>
 
 <script>
-function getUsers(){
-  return JSON.parse(localStorage.getItem("users")) || {};
-}
 
-function saveUsers(users){
-  localStorage.setItem("users", JSON.stringify(users));
-}
+let currentUser = null;
+let correctAnswer = 0;
 
+// ===== ĐĂNG KÝ =====
 function register(){
-  let username = document.getElementById("regUser").value.trim();
-  let password = document.getElementById("regPass").value.trim();
+    let user = regUser.value;
+    let pass = regPass.value;
 
-  if(username === "" || password === ""){
-    alert("Không để trống");
-    return;
-  }
+    if(!user || !pass){
+        alert("Nhập đủ thông tin");
+        return;
+    }
 
-  let users = getUsers();
+    let users = JSON.parse(localStorage.getItem("users")) || {};
 
-  if(users[username]){
-    alert("Tài khoản đã tồn tại");
-    return;
-  }
+    if(users[user]){
+        alert("Tài khoản đã tồn tại");
+        return;
+    }
 
-  users[username] = {
-    password: password,
-    displayName: "",
-    province: ""
-  };
-
-  saveUsers(users);
-
-  alert("Tạo thành công! Giờ đăng nhập.");
+    users[user] = {password:pass, score:0};
+    localStorage.setItem("users", JSON.stringify(users));
+    alert("Tạo thành công!");
+    backLogin();
 }
 
+// ===== ĐĂNG NHẬP =====
 function login(){
-  let username = document.getElementById("loginUser").value.trim();
-  let password = document.getElementById("loginPass").value.trim();
+    let user = loginUser.value;
+    let pass = loginPass.value;
 
-  let users = getUsers();
+    let users = JSON.parse(localStorage.getItem("users")) || {};
 
-  if(!users[username]){
-    alert("Không tồn tại tài khoản");
-    return;
-  }
-
-  if(users[username].password !== password){
-    alert("Sai mật khẩu");
-    return;
-  }
-
-  localStorage.setItem("currentUser", username);
-  showMain(username);
+    if(users[user] && users[user].password === pass){
+        currentUser = user;
+        loginBox.classList.add("hidden");
+        mainBox.classList.remove("hidden");
+        loadProfile();
+        generateQuestion();
+        updateRanking();
+    }else{
+        alert("Sai tài khoản hoặc mật khẩu");
+    }
 }
 
-function showMain(username){
-  document.getElementById("authBox").classList.add("hidden");
-  document.getElementById("mainBox").classList.remove("hidden");
-  document.getElementById("welcome").innerText = "Xin chào " + username;
-  loadProfile();
-}
-
-function logout(){
-  localStorage.removeItem("currentUser");
-  document.getElementById("authBox").classList.remove("hidden");
-  document.getElementById("mainBox").classList.add("hidden");
-}
-
-function toggleProfile(){
-  document.getElementById("profileBox").classList.toggle("hidden");
-  loadProfile();
-}
-
+// ===== PROFILE =====
 function loadProfile(){
-  let user = localStorage.getItem("currentUser");
-  if(!user) return;
-
-  let users = getUsers();
-  let u = users[user];
-
-  document.getElementById("displayName").value = u.displayName || "";
-  document.getElementById("province").value = u.province || "";
-  showProfileInfo();
+    let users = JSON.parse(localStorage.getItem("users"));
+    profileName.innerText = "Tên: " + currentUser;
+    profileScore.innerText = "Điểm: " + users[currentUser].score;
 }
 
-function saveProfile(){
-  let user = localStorage.getItem("currentUser");
-  let users = getUsers();
-
-  users[user].displayName = document.getElementById("displayName").value.trim();
-  users[user].province = document.getElementById("province").value;
-
-  saveUsers(users);
-  showProfileInfo();
-  alert("Lưu thành công");
+// ===== LOGOUT =====
+function logout(){
+    location.reload();
 }
 
-function showProfileInfo(){
-  let user = localStorage.getItem("currentUser");
-  if(!user) return;
-
-  let users = getUsers();
-  let u = users[user];
-
-  document.getElementById("profileInfo").innerText =
-    "Tên hiển thị: " + (u.displayName || "Chưa đặt") +
-    " | Tỉnh: " + (u.province || "Chưa chọn");
+// ===== BÀI TOÁN CĂN BẬC 2 =====
+function generateQuestion(){
+    let num = Math.floor(Math.random()*100)+1;
+    correctAnswer = Math.sqrt(num).toFixed(2);
+    question.innerText = "√" + num + " = ?";
 }
 
-function checkLogin(){
-  let user = localStorage.getItem("currentUser");
-  if(user){
-    showMain(user);
-  }
+function checkAnswer(){
+    let ans = answer.value;
+    if(ans == correctAnswer){
+        result.innerText = "Đúng +10 điểm!";
+        let users = JSON.parse(localStorage.getItem("users"));
+        users[currentUser].score += 10;
+        localStorage.setItem("users", JSON.stringify(users));
+        loadProfile();
+        updateRanking();
+        generateQuestion();
+    }else{
+        result.innerText = "Sai!";
+    }
+    answer.value="";
 }
 
-checkLogin();
+// ===== XẾP HẠNG =====
+function updateRanking(){
+    let users = JSON.parse(localStorage.getItem("users"));
+    let arr = Object.entries(users);
+    arr.sort((a,b)=>b[1].score - a[1].score);
+
+    ranking.innerHTML="";
+    arr.forEach((u,i)=>{
+        let cls="";
+        if(i==0) cls="rank1";
+        if(i==1) cls="rank2";
+        if(i==2) cls="rank3";
+
+        ranking.innerHTML += 
+        `<p class="${cls}">${i+1}. ${u[0]} - ${u[1].score} điểm</p>`;
+    });
+}
+
+// ===== BÁO THỨC =====
+function setAlarm(){
+    let time = alarmTime.value;
+    if(!time){
+        alert("Chọn giờ");
+        return;
+    }
+
+    alarmStatus.innerText="Đã đặt báo thức " + time;
+
+    setInterval(()=>{
+        let now = new Date();
+        let current = now.getHours().toString().padStart(2,'0') + ":" +
+                      now.getMinutes().toString().padStart(2,'0');
+
+        if(current === time){
+            alert("⏰ Tới giờ học rồi!");
+        }
+    },1000);
+}
+
+// ===== CHUYỂN BOX =====
+function showRegister(){
+    loginBox.classList.add("hidden");
+    registerBox.classList.remove("hidden");
+}
+function backLogin(){
+    registerBox.classList.add("hidden");
+    loginBox.classList.remove("hidden");
+}
+
 </script>
 
 </body>
